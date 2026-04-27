@@ -6,10 +6,12 @@
   import BriefingPhase2 from './lib/components/BriefingPhase2.svelte';
   import BriefingPhase3 from './lib/components/BriefingPhase3.svelte';
   import BriefingPhase4 from './lib/components/BriefingPhase4.svelte';
+  import BriefingPhase5 from './lib/components/BriefingPhase5.svelte';
   import CalculationPanel from './lib/components/CalculationPanel.svelte';
   import CalculationPanelPhase2 from './lib/components/CalculationPanelPhase2.svelte';
   import CalculationPanelPhase3 from './lib/components/CalculationPanelPhase3.svelte';
   import CalculationPanelPhase4 from './lib/components/CalculationPanelPhase4.svelte';
+  import CalculationPanelPhase5 from './lib/components/CalculationPanelPhase5.svelte';
   import './app.css';
 
   const startAnalysis = () => {
@@ -18,6 +20,16 @@
 
   const backToBriefing = () => {
     missionState.update(s => ({ ...s, showBriefing: true, isAnalyzing: false }));
+  };
+
+  const stopAllScenes = () => {
+    if (window.game) {
+      window.game.scene.stop('EarthOrbitScene');
+      window.game.scene.stop('LaunchScene');
+      window.game.scene.stop('TLIScene');
+      window.game.scene.stop('LOIScene');
+      window.game.scene.stop('TEIScene');
+    }
   };
 
   const goToPhase1 = () => {
@@ -33,9 +45,7 @@
       status: "Checkout Sistemi"
     }));
     if (window.game) {
-      window.game.scene.stop('LaunchScene');
-      window.game.scene.stop('TLIScene');
-      window.game.scene.stop('LOIScene');
+      stopAllScenes();
       window.game.scene.start('EarthOrbitScene');
     }
   };
@@ -55,9 +65,7 @@
 
     setTimeout(() => {
       if (window.game) {
-        window.game.scene.stop('EarthOrbitScene');
-        window.game.scene.stop('TLIScene');
-        window.game.scene.stop('LOIScene');
+        stopAllScenes();
         window.game.scene.start('LaunchScene');
       }
     }, 50);
@@ -77,9 +85,7 @@
 
     setTimeout(() => {
       if (window.game) {
-        window.game.scene.stop('LaunchScene');
-        window.game.scene.stop('EarthOrbitScene');
-        window.game.scene.stop('LOIScene');
+        stopAllScenes();
         window.game.scene.start('TLIScene');
       }
     }, 50);
@@ -118,9 +124,7 @@
       setTimeout(() => {
         try {
           if (window.game) {
-            window.game.scene.stop('LaunchScene');
-            window.game.scene.stop('EarthOrbitScene');
-            window.game.scene.stop('TLIScene');
+            stopAllScenes();
             window.game.scene.start('LOIScene');
           }
         } catch(e) {
@@ -141,10 +145,53 @@
       didacticFeedback: "",
       studentCalculations: { ...s.studentCalculations, isValid: false } 
     }));
-    // Reset della scena per permettere un nuovo tentativo pulito
     if (window.game) {
       window.game.scene.stop('LOIScene');
       window.game.scene.start('LOIScene');
+    }
+  };
+
+  const startPhase5 = () => {
+    try {
+      missionState.update(s => ({
+        ...s,
+        currentPhase: 5,
+        showBriefing: true,
+        isAnalyzing: false,
+        phase4Complete: false,
+        phase5Complete: false,
+        status: "Pianificazione Rientro (TEI)",
+        studentCalculations: { ...s.studentCalculations, isValid: false },
+        didacticFeedback: ""
+      }));
+
+      setTimeout(() => {
+        try {
+          if (window.game) {
+            stopAllScenes();
+            window.game.scene.start('TEIScene');
+          }
+        } catch(e) {
+          alert('Errore Phaser: ' + e.message);
+        }
+      }, 50);
+    } catch(e) {
+      alert('Errore startPhase5: ' + e.message);
+    }
+  };
+
+  const retryPhase5 = () => {
+    missionState.update(s => ({ 
+      ...s, 
+      showBriefing: false, 
+      isAnalyzing: true, 
+      status: "In attesa di nuovi calcoli",
+      didacticFeedback: "",
+      studentCalculations: { ...s.studentCalculations, isValid: false } 
+    }));
+    if (window.game) {
+      window.game.scene.stop('TEIScene');
+      window.game.scene.start('TEIScene');
     }
   };
 
@@ -165,6 +212,7 @@
         if (e.key === '2') { e.preventDefault(); startPhase2(); }
         if (e.key === '3') { e.preventDefault(); startPhase3(); }
         if (e.key === '4') { e.preventDefault(); startPhase4(); }
+        if (e.key === '5') { e.preventDefault(); startPhase5(); }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -187,6 +235,8 @@
             <BriefingPhase3 onStartAnalysis={startAnalysis} />
           {:else if $missionState.currentPhase === 4}
             <BriefingPhase4 onStartAnalysis={startAnalysis} />
+          {:else if $missionState.currentPhase === 5}
+            <BriefingPhase5 onStartAnalysis={startAnalysis} />
           {/if}
         </div>
       {:else if $missionState.isAnalyzing}
@@ -199,6 +249,8 @@
             <CalculationPanelPhase3 onBack={backToBriefing} />
           {:else if $missionState.currentPhase === 4}
             <CalculationPanelPhase4 onBack={backToBriefing} />
+          {:else if $missionState.currentPhase === 5}
+            <CalculationPanelPhase5 onBack={backToBriefing} />
           {/if}
         </div>
       {/if}
@@ -210,7 +262,8 @@
         <p class="text-nasa-blue font-mono text-xs italic">Fase {$missionState.currentPhase}: 
           {$missionState.currentPhase === 1 ? 'Checkout Orbitale' : 
            $missionState.currentPhase === 2 ? 'Iniezione Orbitale' : 
-           $missionState.currentPhase === 3 ? 'Rotta Cis-Lunare' : 'Orbitazione Lunare'}
+           $missionState.currentPhase === 3 ? 'Rotta Cis-Lunare' : 
+           $missionState.currentPhase === 4 ? 'Orbitazione Lunare' : 'Rientro sulla Terra'}
         </p>
       </div>
 
@@ -267,15 +320,19 @@
                   {$missionState.status}
                 {:else if $missionState.studentCalculations.isValid && !$missionState.isAnalyzing && !$missionState.showBriefing}
                   {$missionState.currentPhase === 2 ? 'Lancio SLS in corso' : 
-                   $missionState.currentPhase === 3 ? 'Esecuzione Manovra TLI' : 'Esecuzione Manovra LOI'}
+                   $missionState.currentPhase === 3 ? 'Esecuzione Manovra TLI' : 
+                   $missionState.currentPhase === 4 ? 'Esecuzione Manovra LOI' : 'Esecuzione Manovra TEI'}
                 {:else if $missionState.phase2Complete && $missionState.currentPhase === 2}
                   Lancio Completato: Orbita Stabilizzata
                 {:else if $missionState.phase3Complete && $missionState.currentPhase === 3}
                   Arrivo nell'orbita lunare
+                {:else if $missionState.phase4Complete && $missionState.currentPhase === 4}
+                  Pronti per il rientro
                 {:else}
                   {$missionState.currentPhase === 1 ? 'Briefing: Analisi Orbitale' : 
                    $missionState.currentPhase === 2 ? 'Briefing: Calcolo Propulsione' : 
-                   $missionState.currentPhase === 3 ? 'Briefing: Iniezione Trans-Lunare' : 'Briefing: Iniezione Orbitale Lunare'}
+                   $missionState.currentPhase === 3 ? 'Briefing: Iniezione Trans-Lunare' : 
+                   $missionState.currentPhase === 4 ? 'Briefing: Iniezione Orbitale Lunare' : 'Briefing: Ritorno a Casa'}
                 {/if}
               </h2>
             </div>
@@ -287,17 +344,22 @@
                   I motori RS-25 sono a pieno regime. Orion sta lasciando la rampa 39B del Kennedy Space Center.
                 {:else if $missionState.currentPhase === 3}
                   Il motore ICPS ha terminato la spinta. Inizia la fase di crociera cis-lunare verso l'obiettivo.
-                {:else}
+                {:else if $missionState.currentPhase === 4}
                   Motori di manovra accesi in modo retrogrado. Controllo telemetria e inserimento orbitale in corso.
+                {:else}
+                  Accensione prograda completata. Monitoraggio traiettoria di fuga in corso.
                 {/if}
               {:else if $missionState.phase2Complete && $missionState.currentPhase === 2}
                 Ottimo lavoro, Comandante. L'SLS ci ha portati in orbita. Ora dobbiamo calcolare il salto verso la Luna.
               {:else if $missionState.phase3Complete && $missionState.currentPhase === 3}
                 Siamo nei pressi della Luna. È ora di frenare per farci catturare.
+              {:else if $missionState.phase4Complete && $missionState.currentPhase === 4}
+                Abbiamo raccolto i dati. È ora di lasciare l'orbita lunare.
               {:else}
                 {$missionState.currentPhase === 1 ? 'Analizza i parametri dell\'orbita di parcheggio...' : 
                  $missionState.currentPhase === 2 ? 'Pianifica il decollo dell\'SLS...' : 
-                 $missionState.currentPhase === 3 ? 'Calcola il Delta-v necessario per la Luna...' : 'Calcola il Delta-v per la frenata (LOI)...'}
+                 $missionState.currentPhase === 3 ? 'Calcola il Delta-v necessario per la Luna...' : 
+                 $missionState.currentPhase === 4 ? 'Calcola il Delta-v per la frenata (LOI)...' : 'Calcola la velocità di fuga (TEI)...'}
               {/if}
             </p>
           </div>
@@ -309,11 +371,15 @@
           {:else if $missionState.phase3Complete && $missionState.currentPhase === 3}
             <button onclick={startPhase4} class="bg-orion-orange hover:bg-orange-600 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-orange-900/40 uppercase tracking-widest text-[11px] border border-white/10 animate-pulse">Vai alla Fase 4: LOI</button>
           {:else if $missionState.phase4Complete && $missionState.currentPhase === 4}
-            <button onclick={() => alert("Fase 5: Rientro - Prossimamente")} class="bg-green-600 hover:bg-green-500 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-green-900/40 uppercase tracking-widest text-[11px] border border-white/10 animate-pulse">Vai alla Fase 5: Rientro</button>
+            <button onclick={startPhase5} class="bg-orion-orange hover:bg-orange-600 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-orange-900/40 uppercase tracking-widest text-[11px] border border-white/10 animate-pulse">Vai alla Fase 5: Rientro</button>
+          {:else if $missionState.phase5Complete && $missionState.currentPhase === 5}
+            <button onclick={() => alert("Fase 6: Discesa e Ammaraggio - Prossimamente")} class="bg-green-600 hover:bg-green-500 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-green-900/40 uppercase tracking-widest text-[11px] border border-white/10 animate-pulse">Vai alla Fase 6: Discesa</button>
           {:else if $missionState.studentCalculations.isValid && $missionState.currentPhase === 3 && !$missionState.phase3Complete}
             <button onclick={retryPhase3} class="bg-red-600 hover:bg-red-500 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-red-900/40 uppercase tracking-widest text-[11px] border border-white/10">Ricalcola Manovra TLI</button>
           {:else if $missionState.studentCalculations.isValid && $missionState.currentPhase === 4 && !$missionState.phase4Complete}
             <button onclick={retryPhase4} class="bg-red-600 hover:bg-red-500 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-red-900/40 uppercase tracking-widest text-[11px] border border-white/10">Ricalcola Frenata</button>
+          {:else if $missionState.studentCalculations.isValid && $missionState.currentPhase === 5 && !$missionState.phase5Complete}
+            <button onclick={retryPhase5} class="bg-red-600 hover:bg-red-500 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-red-900/40 uppercase tracking-widest text-[11px] border border-white/10">Ricalcola Spinta di Fuga</button>
           {:else if !$missionState.studentCalculations.isValid && !$missionState.showBriefing}
             <button onclick={startAnalysis} class="bg-nasa-blue hover:bg-blue-600 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-blue-900/40 uppercase tracking-widest text-[11px] border border-white/10">Inizia Analisi</button>
           {/if}

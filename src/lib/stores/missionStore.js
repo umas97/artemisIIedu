@@ -30,6 +30,7 @@ export const missionState = writable({
     requiredFuel: 0,
     tliDeltaV: 0,
     loiDeltaV: 0,
+    teiDeltaV: 0,
     isValid: false,
   },
 
@@ -46,6 +47,7 @@ export const missionState = writable({
   phase2Complete: false,
   phase3Complete: false,
   phase4Complete: false,
+  phase5Complete: false,
   didacticFeedback: ""
 });
 
