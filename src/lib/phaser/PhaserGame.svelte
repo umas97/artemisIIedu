@@ -5,6 +5,7 @@
   import { EarthOrbitScene } from './scenes/EarthOrbitScene.js';
   import { LaunchScene } from './scenes/LaunchScene.js';
   import { TLIScene } from './scenes/TLIScene.js';
+  import { LOIScene } from './scenes/LOIScene.js';
 
   let gameContainer;
   let game;
@@ -26,7 +27,7 @@
           debug: false
         }
       },
-      scene: [EarthOrbitScene, LaunchScene, TLIScene, BootScene],
+      scene: [EarthOrbitScene, LaunchScene, TLIScene, LOIScene, BootScene],
       backgroundColor: '#050505',
       fps: {
         target: 60,

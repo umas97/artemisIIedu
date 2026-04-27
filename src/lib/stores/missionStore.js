@@ -20,13 +20,16 @@ export const missionState = writable({
     ha: 70174000, // m
     distanceEarthMoon: 384400000, // m
     moonRadius: 1737000, // m
-    GMMoon: 4.9048e12 // m^3/s^2 (Luna)
+    GMMoon: 4.9048e12, // m^3/s^2 (Luna)
+    h_moon_orbit: 100000 // m (Altitudine parcheggio lunare)
   },
   
   studentCalculations: {
     semiMajorAxis: 0,
     orbitalPeriod: 0,
     requiredFuel: 0,
+    tliDeltaV: 0,
+    loiDeltaV: 0,
     isValid: false,
   },
 
@@ -42,6 +45,7 @@ export const missionState = writable({
   phase1Complete: false,
   phase2Complete: false,
   phase3Complete: false,
+  phase4Complete: false,
   didacticFeedback: ""
 });
 
