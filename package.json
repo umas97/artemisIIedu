@@ -1,0 +1,26 @@
+{
+  "name": "progettolanciosimulato",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^7.0.0",
+    "@tauri-apps/cli": "^2.10.1",
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.10",
+    "svelte": "^5.55.4",
+    "tailwindcss": "^4.2.4",
+    "vite": "^8.0.9"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.2.4",
+    "katex": "^0.16.45",
+    "phaser": "^4.0.0"
+  }
+}
