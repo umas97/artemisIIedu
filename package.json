@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.4",
+    "@tauri-apps/api": "^2.10.1",
     "katex": "^0.16.45",
     "phaser": "^4.0.0"
   }

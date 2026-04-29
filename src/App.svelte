@@ -14,6 +14,7 @@
   import CalculationPanelPhase4 from './lib/components/CalculationPanelPhase4.svelte';
   import CalculationPanelPhase5 from './lib/components/CalculationPanelPhase5.svelte';
   import CalculationPanelPhase6 from './lib/components/CalculationPanelPhase6.svelte';
+  import FlightPlan from './lib/components/FlightPlan.svelte';
   import './app.css';
 
   const startAnalysis = () => {
@@ -242,6 +243,38 @@
     }
   };
 
+  const openFlightPlan = () => {
+    missionState.update(s => ({ ...s, showFlightPlan: true }));
+  };
+
+  const closeFlightPlan = () => {
+    missionState.update(s => ({ ...s, showFlightPlan: false }));
+  };
+
+  const restartMission = () => {
+    missionState.update(s => ({
+      ...s,
+      currentPhase: 1,
+      showBriefing: true,
+      isAnalyzing: false,
+      showFlightPlan: false,
+      phase1Complete: false,
+      phase2Complete: false,
+      phase3Complete: false,
+      phase4Complete: false,
+      phase5Complete: false,
+      phase6Complete: false,
+      didacticFeedback: "",
+      status: "Checkout Sistemi",
+      studentCalculations: { ...s.studentCalculations, isValid: false, semiMajorAxis: 0, orbitalPeriod: 0, requiredFuel: 0, tliDeltaV: 0, loiDeltaV: 0, teiDeltaV: 0, reentryAngle: 0, parachuteDrogueAltitude: 0, parachuteArea: 0 },
+      telemetry: { velocity: 0, altitude: 0, fuelRemaining: 100, stage: "Core Stage" }
+    }));
+    if (window.game) {
+      stopAllScenes();
+      window.game.scene.start('EarthOrbitScene');
+    }
+  };
+
   onMount(() => {
     window.addEventListener('error', (e) => {
       alert('GLOBAL ERROR: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
@@ -441,7 +474,7 @@
           {:else if $missionState.phase5Complete && $missionState.currentPhase === 5}
             <button onclick={startPhase6} class="bg-orion-orange hover:bg-orange-600 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-orange-900/40 uppercase tracking-widest text-[11px] border border-white/10 animate-pulse">Vai alla Fase 6: Discesa</button>
           {:else if $missionState.phase6Complete && $missionState.currentPhase === 6}
-            <button onclick={() => alert("Mostra Flight Plan Finale (Da implementare)")} class="bg-green-600 hover:bg-green-500 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-green-900/40 uppercase tracking-widest text-[11px] border border-white/10 animate-pulse">Genera Flight Plan</button>
+            <button onclick={openFlightPlan} class="bg-green-600 hover:bg-green-500 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-green-900/40 uppercase tracking-widest text-[11px] border border-white/10 animate-pulse">Genera Flight Plan</button>
           {:else if $missionState.studentCalculations.isValid && $missionState.currentPhase === 3 && !$missionState.phase3Complete}
             <button onclick={retryPhase3} class="bg-red-600 hover:bg-red-500 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-red-900/40 uppercase tracking-widest text-[11px] border border-white/10">Ricalcola Manovra TLI</button>
           {:else if $missionState.studentCalculations.isValid && $missionState.currentPhase === 4 && !$missionState.phase4Complete}
@@ -457,6 +490,10 @@
       </div>
     </div>
   </div>
+
+  {#if $missionState.showFlightPlan}
+    <FlightPlan onClose={closeFlightPlan} onRestart={restartMission} />
+  {/if}
 </main>
 
 <style>

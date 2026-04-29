@@ -52,6 +52,7 @@ export const missionState = writable({
   phase4Complete: false,
   phase5Complete: false,
   phase6Complete: false,
+  showFlightPlan: false,
   didacticFeedback: ""
 });
 
