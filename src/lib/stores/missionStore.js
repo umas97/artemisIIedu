@@ -31,6 +31,9 @@ export const missionState = writable({
     tliDeltaV: 0,
     loiDeltaV: 0,
     teiDeltaV: 0,
+    reentryAngle: 0,
+    parachuteDrogueAltitude: 0,
+    parachuteArea: 0,
     isValid: false,
   },
 
@@ -48,6 +51,7 @@ export const missionState = writable({
   phase3Complete: false,
   phase4Complete: false,
   phase5Complete: false,
+  phase6Complete: false,
   didacticFeedback: ""
 });
 

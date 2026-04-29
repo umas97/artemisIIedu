@@ -7,11 +7,13 @@
   import BriefingPhase3 from './lib/components/BriefingPhase3.svelte';
   import BriefingPhase4 from './lib/components/BriefingPhase4.svelte';
   import BriefingPhase5 from './lib/components/BriefingPhase5.svelte';
+  import BriefingPhase6 from './lib/components/BriefingPhase6.svelte';
   import CalculationPanel from './lib/components/CalculationPanel.svelte';
   import CalculationPanelPhase2 from './lib/components/CalculationPanelPhase2.svelte';
   import CalculationPanelPhase3 from './lib/components/CalculationPanelPhase3.svelte';
   import CalculationPanelPhase4 from './lib/components/CalculationPanelPhase4.svelte';
   import CalculationPanelPhase5 from './lib/components/CalculationPanelPhase5.svelte';
+  import CalculationPanelPhase6 from './lib/components/CalculationPanelPhase6.svelte';
   import './app.css';
 
   const startAnalysis = () => {
@@ -29,6 +31,7 @@
       window.game.scene.stop('TLIScene');
       window.game.scene.stop('LOIScene');
       window.game.scene.stop('TEIScene');
+      window.game.scene.stop('ReentryScene');
     }
   };
 
@@ -195,6 +198,50 @@
     }
   };
 
+  const startPhase6 = () => {
+    try {
+      missionState.update(s => ({
+        ...s,
+        currentPhase: 6,
+        showBriefing: true,
+        isAnalyzing: false,
+        phase5Complete: false,
+        phase6Complete: false,
+        status: "Pianificazione Discesa (Reentry)",
+        studentCalculations: { ...s.studentCalculations, isValid: false },
+        didacticFeedback: ""
+      }));
+
+      setTimeout(() => {
+        try {
+          if (window.game) {
+            stopAllScenes();
+            window.game.scene.start('ReentryScene');
+          }
+        } catch(e) {
+          alert('Errore Phaser: ' + e.message);
+        }
+      }, 50);
+    } catch(e) {
+      alert('Errore startPhase6: ' + e.message);
+    }
+  };
+
+  const retryPhase6 = () => {
+    missionState.update(s => ({ 
+      ...s, 
+      showBriefing: false, 
+      isAnalyzing: true, 
+      status: "In attesa di nuovi calcoli",
+      didacticFeedback: "",
+      studentCalculations: { ...s.studentCalculations, isValid: false } 
+    }));
+    if (window.game) {
+      window.game.scene.stop('ReentryScene');
+      window.game.scene.start('ReentryScene');
+    }
+  };
+
   onMount(() => {
     window.addEventListener('error', (e) => {
       alert('GLOBAL ERROR: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
@@ -213,6 +260,7 @@
         if (e.key === '3') { e.preventDefault(); startPhase3(); }
         if (e.key === '4') { e.preventDefault(); startPhase4(); }
         if (e.key === '5') { e.preventDefault(); startPhase5(); }
+        if (e.key === '6') { e.preventDefault(); startPhase6(); }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -237,6 +285,8 @@
             <BriefingPhase4 onStartAnalysis={startAnalysis} />
           {:else if $missionState.currentPhase === 5}
             <BriefingPhase5 onStartAnalysis={startAnalysis} />
+          {:else if $missionState.currentPhase === 6}
+            <BriefingPhase6 onStartAnalysis={startAnalysis} />
           {/if}
         </div>
       {:else if $missionState.isAnalyzing}
@@ -251,6 +301,8 @@
             <CalculationPanelPhase4 onBack={backToBriefing} />
           {:else if $missionState.currentPhase === 5}
             <CalculationPanelPhase5 onBack={backToBriefing} />
+          {:else if $missionState.currentPhase === 6}
+            <CalculationPanelPhase6 onBack={backToBriefing} />
           {/if}
         </div>
       {/if}
@@ -263,7 +315,8 @@
           {$missionState.currentPhase === 1 ? 'Checkout Orbitale' : 
            $missionState.currentPhase === 2 ? 'Iniezione Orbitale' : 
            $missionState.currentPhase === 3 ? 'Rotta Cis-Lunare' : 
-           $missionState.currentPhase === 4 ? 'Orbitazione Lunare' : 'Rientro sulla Terra'}
+           $missionState.currentPhase === 4 ? 'Orbitazione Lunare' : 
+           $missionState.currentPhase === 5 ? 'Rientro sulla Terra' : 'Discesa e Ammaraggio'}
         </p>
       </div>
 
@@ -321,18 +374,24 @@
                 {:else if $missionState.studentCalculations.isValid && !$missionState.isAnalyzing && !$missionState.showBriefing}
                   {$missionState.currentPhase === 2 ? 'Lancio SLS in corso' : 
                    $missionState.currentPhase === 3 ? 'Esecuzione Manovra TLI' : 
-                   $missionState.currentPhase === 4 ? 'Esecuzione Manovra LOI' : 'Esecuzione Manovra TEI'}
+                   $missionState.currentPhase === 4 ? 'Esecuzione Manovra LOI' : 
+                   $missionState.currentPhase === 5 ? 'Esecuzione Manovra TEI' : 'Rientro Atmosferico in corso'}
                 {:else if $missionState.phase2Complete && $missionState.currentPhase === 2}
                   Lancio Completato: Orbita Stabilizzata
                 {:else if $missionState.phase3Complete && $missionState.currentPhase === 3}
                   Arrivo nell'orbita lunare
                 {:else if $missionState.phase4Complete && $missionState.currentPhase === 4}
                   Pronti per il rientro
+                {:else if $missionState.phase5Complete && $missionState.currentPhase === 5}
+                  Pronti per la discesa atmosferica
+                {:else if $missionState.phase6Complete && $missionState.currentPhase === 6}
+                  Ammaraggio Riuscito! Missione Completata
                 {:else}
                   {$missionState.currentPhase === 1 ? 'Briefing: Analisi Orbitale' : 
                    $missionState.currentPhase === 2 ? 'Briefing: Calcolo Propulsione' : 
                    $missionState.currentPhase === 3 ? 'Briefing: Iniezione Trans-Lunare' : 
-                   $missionState.currentPhase === 4 ? 'Briefing: Iniezione Orbitale Lunare' : 'Briefing: Ritorno a Casa'}
+                   $missionState.currentPhase === 4 ? 'Briefing: Iniezione Orbitale Lunare' : 
+                   $missionState.currentPhase === 5 ? 'Briefing: Ritorno a Casa' : 'Briefing: Discesa Finale'}
                 {/if}
               </h2>
             </div>
@@ -346,8 +405,10 @@
                   Il motore ICPS ha terminato la spinta. Inizia la fase di crociera cis-lunare verso l'obiettivo.
                 {:else if $missionState.currentPhase === 4}
                   Motori di manovra accesi in modo retrogrado. Controllo telemetria e inserimento orbitale in corso.
-                {:else}
+                {:else if $missionState.currentPhase === 5}
                   Accensione prograda completata. Monitoraggio traiettoria di fuga in corso.
+                {:else if $missionState.currentPhase === 6}
+                  Capsula in ingresso atmosferico. Monitoraggio temperature e assetto in corso.
                 {/if}
               {:else if $missionState.phase2Complete && $missionState.currentPhase === 2}
                 Ottimo lavoro, Comandante. L'SLS ci ha portati in orbita. Ora dobbiamo calcolare il salto verso la Luna.
@@ -355,11 +416,16 @@
                 Siamo nei pressi della Luna. È ora di frenare per farci catturare.
               {:else if $missionState.phase4Complete && $missionState.currentPhase === 4}
                 Abbiamo raccolto i dati. È ora di lasciare l'orbita lunare.
+              {:else if $missionState.phase5Complete && $missionState.currentPhase === 5}
+                Siamo in rotta verso la Terra. Ora prepariamoci all'impatto con l'atmosfera.
+              {:else if $missionState.phase6Complete && $missionState.currentPhase === 6}
+                Congratulazioni Comandante! L'equipaggio di Artemis II è tornato a casa sano e salvo.
               {:else}
                 {$missionState.currentPhase === 1 ? 'Analizza i parametri dell\'orbita di parcheggio...' : 
                  $missionState.currentPhase === 2 ? 'Pianifica il decollo dell\'SLS...' : 
                  $missionState.currentPhase === 3 ? 'Calcola il Delta-v necessario per la Luna...' : 
-                 $missionState.currentPhase === 4 ? 'Calcola il Delta-v per la frenata (LOI)...' : 'Calcola la velocità di fuga (TEI)...'}
+                 $missionState.currentPhase === 4 ? 'Calcola il Delta-v per la frenata (LOI)...' : 
+                 $missionState.currentPhase === 5 ? 'Calcola la velocità di fuga (TEI)...' : 'Calcola i parametri di rientro...'}
               {/if}
             </p>
           </div>
@@ -373,13 +439,17 @@
           {:else if $missionState.phase4Complete && $missionState.currentPhase === 4}
             <button onclick={startPhase5} class="bg-orion-orange hover:bg-orange-600 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-orange-900/40 uppercase tracking-widest text-[11px] border border-white/10 animate-pulse">Vai alla Fase 5: Rientro</button>
           {:else if $missionState.phase5Complete && $missionState.currentPhase === 5}
-            <button onclick={() => alert("Fase 6: Discesa e Ammaraggio - Prossimamente")} class="bg-green-600 hover:bg-green-500 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-green-900/40 uppercase tracking-widest text-[11px] border border-white/10 animate-pulse">Vai alla Fase 6: Discesa</button>
+            <button onclick={startPhase6} class="bg-orion-orange hover:bg-orange-600 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-orange-900/40 uppercase tracking-widest text-[11px] border border-white/10 animate-pulse">Vai alla Fase 6: Discesa</button>
+          {:else if $missionState.phase6Complete && $missionState.currentPhase === 6}
+            <button onclick={() => alert("Mostra Flight Plan Finale (Da implementare)")} class="bg-green-600 hover:bg-green-500 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-green-900/40 uppercase tracking-widest text-[11px] border border-white/10 animate-pulse">Genera Flight Plan</button>
           {:else if $missionState.studentCalculations.isValid && $missionState.currentPhase === 3 && !$missionState.phase3Complete}
             <button onclick={retryPhase3} class="bg-red-600 hover:bg-red-500 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-red-900/40 uppercase tracking-widest text-[11px] border border-white/10">Ricalcola Manovra TLI</button>
           {:else if $missionState.studentCalculations.isValid && $missionState.currentPhase === 4 && !$missionState.phase4Complete}
             <button onclick={retryPhase4} class="bg-red-600 hover:bg-red-500 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-red-900/40 uppercase tracking-widest text-[11px] border border-white/10">Ricalcola Frenata</button>
           {:else if $missionState.studentCalculations.isValid && $missionState.currentPhase === 5 && !$missionState.phase5Complete}
             <button onclick={retryPhase5} class="bg-red-600 hover:bg-red-500 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-red-900/40 uppercase tracking-widest text-[11px] border border-white/10">Ricalcola Spinta di Fuga</button>
+          {:else if $missionState.studentCalculations.isValid && $missionState.currentPhase === 6 && !$missionState.phase6Complete}
+            <button onclick={retryPhase6} class="bg-red-600 hover:bg-red-500 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-red-900/40 uppercase tracking-widest text-[11px] border border-white/10">Ricalcola Rientro</button>
           {:else if !$missionState.studentCalculations.isValid && !$missionState.showBriefing}
             <button onclick={startAnalysis} class="bg-nasa-blue hover:bg-blue-600 text-white px-10 py-4 rounded-xl font-black transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-blue-900/40 uppercase tracking-widest text-[11px] border border-white/10">Inizia Analisi</button>
           {/if}
