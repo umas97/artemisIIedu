@@ -81,7 +81,7 @@
       >
       necessaria per il razzo <strong>SLS Block 1</strong>. Il lancio richiede
       un <span use:math={{ expression: "\\Delta v" }}></span> totale di circa
-      <strong>9.500 m/s</strong> per raggiungere l'orbita di parcheggio terrestre.
+      <strong>9500 m/s</strong> per raggiungere l'orbita di parcheggio terrestre.
     </p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -127,6 +127,7 @@
           </div>
         </div>
 
+        <!--
         <div
           class="bg-gray-800/50 border border-gray-600/30 p-4 rounded-xl shadow-inner"
         >
@@ -143,7 +144,7 @@
                 d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
               /></svg
             >
-            Esercizio Analitico
+            Suggerimento
           </h3>
           <p class="text-sm">
             Sapendo che <span
@@ -156,7 +157,7 @@
             necessaria per ottenere il
             <span use:math={{ expression: "\\Delta v" }}></span> richiesto.
           </p>
-        </div>
+        </div>-->
       </div>
 
       <!-- Colonna Destra: Specifiche + Docente -->
@@ -186,7 +187,7 @@
           >
             <li>
               Massa a vuoto: <span
-                use:math={{ expression: "m_{dry} = 150.000\\text{ kg}" }}
+                use:math={{ expression: "m_{dry} = 150000\\text{ kg}" }}
               ></span>
             </li>
             <li>
@@ -202,7 +203,7 @@
             <li>
               Delta-v Richiesto: <span
                 use:math={{
-                  expression: "\\Delta v_{target} = 9.500\\text{ m/s}",
+                  expression: "\\Delta v_{target} = 9500\\text{ m/s}",
                 }}
               ></span>
             </li>

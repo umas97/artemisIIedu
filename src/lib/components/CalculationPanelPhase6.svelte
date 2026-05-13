@@ -20,13 +20,13 @@
 
   onMount(() => {
     const handleKeyDown = (e) => {
-      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'd') {
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "d") {
         e.preventDefault();
         teacherMode = !teacherMode;
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   });
 
   const validateAndSubmit = () => {
@@ -114,7 +114,7 @@
                 throwOnError: false,
               })})</span
             >
-            <span class="text-white font-bold">9.81 m/s²</span>
+            <span class="text-white font-bold">9,81 m/s²</span>
           </li>
           <li class="flex justify-between border-b border-white/10 pb-2">
             <span class="text-nasa-blue font-bold"
@@ -122,7 +122,7 @@
                 throwOnError: false,
               })})</span
             >
-            <span class="text-white font-bold">1.225 kg/m³</span>
+            <span class="text-white font-bold">1,225 kg/m³</span>
           </li>
           <li class="flex justify-between border-b border-white/10 pb-2">
             <span class="text-nasa-blue font-bold"
@@ -130,7 +130,7 @@
                 throwOnError: false,
               })})</span
             >
-            <span class="text-white font-bold">2.0</span>
+            <span class="text-white font-bold">2,0</span>
           </li>
           <li class="flex justify-between border-b border-white/10 pb-2">
             <span class="text-nasa-blue font-bold"
@@ -208,15 +208,46 @@
 
   <div class="space-y-6 relative z-10">
     {#if teacherMode}
-      <div class="bg-yellow-500/10 border border-yellow-500/40 p-5 rounded-xl shadow-inner animate-pulse">
-        <p class="text-yellow-500 font-black text-sm uppercase mb-2 flex items-center gap-2">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" /></svg>
+      <div
+        class="bg-yellow-500/10 border border-yellow-500/40 p-5 rounded-xl shadow-inner animate-pulse"
+      >
+        <p
+          class="text-yellow-500 font-black text-sm uppercase mb-2 flex items-center gap-2"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 14l9-5-9-5-9 5 9 5z"
+            /><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
+            /><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"
+            /></svg
+          >
           Modalità Docente Attiva
         </p>
-        <ul class="text-yellow-400 text-[11px] space-y-1 font-mono uppercase tracking-wider">
+        <ul
+          class="text-yellow-400 text-[11px] space-y-1 font-mono uppercase tracking-wider"
+        >
           <li>Angolo Corretto: <span class="text-white">-6.5°</span></li>
-          <li>Altitudine Drogue: <span class="text-white">7000 m</span> (10000 - 150*20)</li>
-          <li>Superficie Main: <span class="text-white">~832 m²</span> (204048 / 245)</li>
+          <li>
+            Altitudine Drogue: <span class="text-white">7000 m</span> (10000 - 150*20)
+          </li>
+          <li>
+            Superficie Main: <span class="text-white">~832 m²</span> (204048 / 245)
+          </li>
         </ul>
       </div>
     {/if}
