@@ -47,8 +47,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ github.ref_type == 'tag' && github.ref_name || 'v1.0.0' }}
-          releaseName: 'Artemis II Simulator ${{ github.ref_type == 'tag' && github.ref_name || 'v1.0.0' }}'
+          tagName: "${{ github.ref_type == 'tag' && github.ref_name || 'v1.0.0' }}"
+          releaseName: "Artemis II Simulator ${{ github.ref_type == 'tag' && github.ref_name || 'v1.0.0' }}"
           releaseBody: 'Nuova versione di Artemis II Simulator. Include eseguibili per Windows, macOS e Linux.'
           releaseDraft: true
           prerelease: false
