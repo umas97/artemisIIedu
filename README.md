@@ -20,11 +20,11 @@ Il simulatore riproduce l'intero viaggio della navicella Orion, guidando l'utent
 
 - **Fase 1 (Lancio e Ascesa):** Il decollo del razzo dalla Terra. Serve a introdurre i parametri base della missione e far percepire l'inizio dell'esplorazione spaziale.
 - **Fase 2 (Orbita di Parcheggio Terrestre):** La navicella si inserisce in un'orbita temporanea attorno al nostro pianeta. Qui gli studenti possono familiarizzare con concetti geometrici come l'altitudine del perigeo e il moto circolare/ellittico.
-- **Fase 3 (Iniezione Trans-Lunare - TLI):** Il momento in cui i motori si accendono per sfuggire all'orbita terrestre. Dal punto di vista didattico è la fase più importante: attivando la Modalità Docente si osserva in tempo reale il calcolo del *Delta-v* ($\Delta v$), la grande variazione di velocità necessaria per la manovra.
+- **Fase 3 (Iniezione Trans-Lunare - TLI):** Il momento in cui i motori si accendono per sfuggire all'orbita terrestre. Dal punto di vista didattico è la fase più importante: attivando la Modalità Docente si osserva in tempo reale il calcolo del _Delta-v_ ($\Delta v$), la grande variazione di velocità necessaria per la manovra.
 - **Fase 4 (Viaggio verso la Luna):** Il transito nello spazio profondo. Questa visualizzazione aiuta gli studenti a percepire e comprendere concretamente l'immensa distanza tra la Terra e la Luna (circa 384.400 km).
-- **Fase 5 (Sorvolo Lunare - Flyby):** La navicella aggira la Luna senza atterrare. Sfrutta l'attrazione gravitazionale lunare per invertire la rotta e farsi "spingere" indietro verso casa. È l'occasione perfetta per spiegare in classe l'effetto fionda gravitazionale (*gravity assist*).
+- **Fase 5 (Sorvolo Lunare - Flyby):** La navicella aggira la Luna senza atterrare. Sfrutta l'attrazione gravitazionale lunare per invertire la rotta e farsi "spingere" indietro verso casa. È l'occasione perfetta per spiegare in classe l'effetto fionda gravitazionale (_gravity assist_).
 - **Fase 6 (Rientro e Ammaraggio):** La missione si conclude con il ritorno sicuro sulla Terra. Al termine, la simulazione può essere ripetuta o chiusa.
-- **Flight plan (Piano di Volo):** In qualsiasi momento, o alla fine del viaggio, il software genera un report riassuntivo stampabile. È pensato appositamente per le scuole: documenta tutti i passaggi svolti e può essere usato dai docenti come scheda di laboratorio per assegnare esercizi sui dati raccolti dagli studenti.
+- **Flight plan (Piano di Volo):** Alla fine del viaggio, il software genera un report riassuntivo stampabile. È pensato appositamente per le scuole: documenta tutti i passaggi svolti e può essere usato dai docenti come scheda di laboratorio per assegnare esercizi sui dati raccolti dagli studenti.
 
 ## ✨ Caratteristiche Principali
 
