@@ -42,3 +42,6 @@ Questo progetto combina tecnologie web moderne con un framework per la creazione
 - **[Phaser](https://phaser.io/)**: Per il rendering visivo e la gestione della scena spaziale.
 - **[KaTeX](https://katex.org/)**: Per la formattazione tipografica professionale delle formule matematiche all'interno della UI.
 - **[Tailwind CSS](https://tailwindcss.com/)**: Per un design rapido, reattivo e coerente.
+
+---
+Progetto realizzato in *vibe coding* da [umas97](https://github.com/umas97). Tutti i conti e l'intera interfaccia sono stati controllati e corretti manualmente per garantirne l'accuratezza.
