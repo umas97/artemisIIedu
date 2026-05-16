@@ -44,4 +44,16 @@ Questo progetto combina tecnologie web moderne con un framework per la creazione
 - **[Tailwind CSS](https://tailwindcss.com/)**: Per un design rapido, reattivo e coerente.
 
 ---
+
+## ⚠️ Avviso per gli utenti Windows (SmartScreen)
+
+Poiché questo è un progetto open source, l'eseguibile non possiede una firma digitale commerciale. Di conseguenza, Windows Defender SmartScreen potrebbe bloccare l'avvio dell'app mostrando il messaggio "PC protetto da Windows".
+Per eseguire il programma:
+- Clicca su Ulteriori informazioni (More info).
+- Clicca sul pulsante Esegui comunque (Run anyway).
+
+*Tutto il codice sorgente è pubblico e verificabile in questa repository.*
+
+---
+
 Progetto realizzato in *vibe coding* da [umas97](https://github.com/umas97). Tutti i conti e l'intera interfaccia sono stati controllati e corretti manualmente per garantirne l'accuratezza.
