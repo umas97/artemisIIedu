@@ -1,63 +1,86 @@
 <script>
-  import { missionState } from '../stores/missionStore';
   import { math } from '../actions/math.js';
-  export let onStartAnalysis;
+  import PanelHeader from './ui/PanelHeader.svelte';
+  import RealityNote from './ui/RealityNote.svelte';
+  import TeacherBox from './ui/TeacherBox.svelte';
+  import { MOON } from '../physics/constants.js';
+
+  let { onStartAnalysis } = $props();
+
+  const V_ARR = 2515; // m/s, velocità di arrivo al perilunio (stessa della scena LOIScene)
+  const fmt = (v, d = 0) => v.toLocaleString('it-IT', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const r = MOON.R + MOON.orbitAltitude;
+  const vCirc = Math.sqrt(MOON.GM / r);
+  const vEsc = Math.sqrt((2 * MOON.GM) / r);
 </script>
 
-<div class="max-w-3xl bg-black/85 backdrop-blur-2xl border border-nasa-blue/40 rounded-3xl p-10 shadow-2xl text-white">
-  <div class="flex items-center gap-5 mb-8">
-    <div class="w-14 h-14 bg-nasa-blue/20 rounded-2xl flex items-center justify-center border border-nasa-blue/40 rotate-3">
-      <span class="text-nasa-blue font-black text-2xl">04</span>
-    </div>
-    <div>
-      <h2 class="text-3xl font-black uppercase tracking-tighter italic">Fase 4: Orbitazione Lunare</h2>
-      <p class="text-nasa-blue font-mono text-[10px] uppercase tracking-[0.3em]">Protocollo Lunar Orbit Insertion (LOI)</p>
-    </div>
-  </div>
+<div class="mc-panel w-full max-w-5xl p-6 md:p-8">
+  <PanelHeader step={4} kicker="Briefing · Inserimento in orbita lunare (LOI)" title="Farsi catturare dalla Luna" />
 
-  <div class="space-y-6 text-[13px] leading-relaxed text-gray-300">
+  <div class="space-y-5 text-base leading-relaxed">
     <p>
-      Comandante, la crociera cis-lunare è terminata. Ci stiamo avvicinando alla Luna lungo una traiettoria iperbolica con un'alta velocità residua.
-      Se non interveniamo, la gravità lunare devierà la nostra rotta ma non sarà sufficiente per trattenerci: verremmo scagliati di nuovo nello spazio profondo.
+      Comandante, la crociera verso la Luna è terminata. Mentre ci avviciniamo, la gravità lunare ci accelera: arriveremo al punto
+      più vicino alla Luna (<strong class="text-white">perilunio</strong>, a {fmt(MOON.orbitAltitude / 1000)} km di quota) a circa
+      {fmt(V_ARR)} m/s. È più della velocità di fuga lunare a quella quota: se non facciamo nulla, la Luna devia la nostra rotta ma
+      non riesce a trattenerci, e Orion si allontana di nuovo.
     </p>
 
-    <div class="grid grid-cols-2 gap-6 my-8">
-      <div class="bg-white/5 p-5 rounded-2xl border border-white/5">
-        <h4 class="text-nasa-blue font-black text-[10px] uppercase mb-3 tracking-widest">Il Problema</h4>
-        <p class="text-xs italic leading-snug">
-          Per entrare in un'orbita stabile attorno alla Luna, dobbiamo effettuare una manovra di "Lunar Orbit Insertion" (LOI). 
-          Al momento del massimo avvicinamento (perilunio), dobbiamo ruotare la navicella e accendere i motori in senso contrario per frenare (retro-burn).
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="mc-card space-y-2">
+        <div class="mc-label">Il problema</div>
+        <p class="text-sm">
+          Per entrare in un'orbita attorno alla Luna dobbiamo <strong class="text-white">frenare</strong>: al perilunio giriamo
+          Orion e accendiamo il motore nel verso opposto al moto. È la manovra di
+          <strong class="text-white">Lunar Orbit Insertion</strong> (LOI). Vogliamo un'orbita circolare a
+          {fmt(MOON.orbitAltitude / 1000)} km di quota, quindi dopo la frenata la velocità deve essere esattamente quella circolare.
         </p>
       </div>
-      <div class="bg-white/5 p-5 rounded-2xl border border-white/5">
-        <h4 class="text-orion-orange font-black text-[10px] uppercase mb-3 tracking-widest">Domande Guida</h4>
-        <ul class="text-[11px] list-disc list-inside space-y-2 text-gray-400">
-          <li>Qual è la velocità dell'orbita circolare che vogliamo raggiungere?</li>
-          <li>Quanto dobbiamo frenare (Delta-v) rispetto alla nostra velocità di arrivo?</li>
-          <li>Cosa succede se freniamo troppo o troppo poco?</li>
+
+      <div class="mc-card space-y-2">
+        <div class="mc-label">Domande guida</div>
+        <ul class="text-sm list-disc pl-5 space-y-2">
+          <li>Qual è il raggio dell'orbita obiettivo, misurato dal centro della Luna?</li>
+          <li>Qual è la velocità di un'orbita circolare a quella distanza?</li>
+          <li>Di quanto dobbiamo ridurre la velocità di arrivo? Cosa succede se freniamo troppo o troppo poco?</li>
         </ul>
       </div>
     </div>
 
-    <div class="space-y-4">
-      <h3 class="text-white font-bold uppercase text-xs tracking-widest flex items-center gap-2">
-        <span class="w-2 h-2 bg-nasa-blue rounded-full"></span> Strumenti di Analisi
-      </h3>
-      <p>
-        Calcola la velocità necessaria per mantenere un'orbita circolare stabile di parcheggio lunare (v_circ), usando la massa della Luna e il raggio dell'orbita (r = R_Luna + h). 
-        Il tuo obiettivo sarà determinare il Δv (la differenza tra la velocità con cui stiamo arrivando e la v_circ).
+    <div class="mc-card space-y-3">
+      <div class="mc-label">Strumenti di analisi</div>
+      <p class="text-sm">
+        La velocità di un'orbita circolare di raggio <span use:math={{ expression: 'r = R_{Luna} + h' }}></span> si ottiene
+        uguagliando la forza di gravità alla forza centripeta:
       </p>
-      <div class="bg-black/50 p-4 rounded-xl text-center border border-nasa-blue/20 shadow-inner my-4 overflow-x-auto text-[16px]">
-        <div use:math={{expression: 'v_{circ} = \\sqrt{\\frac{GM_{Luna}}{r}}', displayMode: true}}></div>
-      </div>
+      <div class="flex justify-center text-white" use:math={{ expression: 'v_{circ} = \\sqrt{\\frac{GM_{Luna}}{r}}', displayMode: true }}></div>
+      <p class="text-sm text-muted">
+        Il Δv della frenata è la differenza tra la velocità di arrivo al perilunio e <span use:math={{ expression: 'v_{circ}' }}></span>.
+        Se freniamo poco, l'orbita resta ellittica e allungata (o Orion sfugge alla Luna); se freniamo troppo, l'orbita si abbassa
+        sul lato opposto e può finire contro la superficie.
+      </p>
     </div>
 
-    <div class="flex gap-4 pt-6">
-      <button 
-        onclick={onStartAnalysis}
-        class="flex-1 bg-nasa-blue hover:bg-blue-600 text-white font-black py-5 rounded-2xl uppercase tracking-widest text-xs transition-all transform hover:scale-[1.02] active:scale-95 shadow-xl shadow-blue-900/40 border border-white/10"
-      >
-        Inizia Analisi del LOI
+    <RealityNote>
+      Artemis II reale <strong class="text-white">non è entrata in orbita lunare</strong>: ha fatto un sorvolo della Luna lungo una
+      traiettoria di <strong class="text-white">libero ritorno</strong> (free-return), cioè una traiettoria che, grazie alla sola
+      gravità della Luna, riporta la navicella verso la Terra senza grandi accensioni. Qui l'orbita lunare è un esercizio, come
+      facevano le missioni Apollo e come faranno le future missioni Artemis III e successive.
+    </RealityNote>
+
+    <TeacherBox>
+      <div class="space-y-1 text-lunar-gray">
+        <div>
+          r = {fmt(r / 1000)} km · v<sub>circ</sub> ≈ {fmt(vCirc)} m/s · v<sub>fuga</sub> ≈ {fmt(vEsc)} m/s · v<sub>arr</sub> =
+          {fmt(V_ARR)} m/s
+        </div>
+        <div>Δv = v<sub>arr</sub> − v<sub>circ</sub> ≈ <span class="mc-data font-bold">{fmt(V_ARR - vCirc)} m/s</span></div>
+      </div>
+    </TeacherBox>
+
+    <div class="flex justify-end pt-1">
+      <button type="button" class="mc-btn mc-btn-primary" onclick={onStartAnalysis}>
+        Apri il terminale di calcolo
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
       </button>
     </div>
   </div>

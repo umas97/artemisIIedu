@@ -1,202 +1,226 @@
 <script>
-  import { onMount } from 'svelte';
-  import { missionState } from '../stores/missionStore';
-  
-  let studentA = "";
-  let studentT = "";
-  let feedback = "";
-  let success = false;
-  let showInfo = false;
-  let showSecretFormulas = false;
+  import { missionState } from '../stores/missionStore.js';
+  import { math } from '../actions/math.js';
+  import { EARTH, HEO } from '../physics/constants.js';
+  import PanelHeader from './ui/PanelHeader.svelte';
+  import HintsModal from './ui/HintsModal.svelte';
+  import TeacherBox from './ui/TeacherBox.svelte';
 
-  $: ({ constants } = $missionState);
+  let { onBack } = $props();
 
-  const checkCalculations = () => {
-    const realA = ((constants.hp + constants.RE) + (constants.ha + constants.RE)) / 2;
-    const realT = 2 * Math.PI * Math.sqrt(Math.pow(realA, 3) / constants.GM);
-    
-    const inputA = parseFloat(studentA);
-    const inputT = parseFloat(studentT);
-    const margin = 0.05; 
-    const aOk = Math.abs(inputA - realA) / realA < margin;
-    const tOk = Math.abs(inputT - realT) / realT < margin;
+  // Tolleranza accettata sulle risposte (2%)
+  const TOL = 0.02;
+
+  // Valori di riferimento (dalle costanti condivise)
+  const R = EARTH.R;
+  const GM = EARTH.GM;
+  const rp = R + HEO.hp;
+  const ra = R + HEO.ha;
+  const A = (rp + ra) / 2;
+  const T = 2 * Math.PI * Math.sqrt(A ** 3 / GM);
+
+  let studentA = $state(null);
+  let studentT = $state(null);
+  let aMsg = $state(''); // esito del semiasse
+  let tMsg = $state(''); // esito del periodo
+  let aOk = $state(false);
+  let tOk = $state(false);
+  let checked = $state(false);
+  let showHints = $state(false);
+
+  let success = $derived(checked && aOk && tOk);
+
+  const fmt = (v, d = 0) => v.toLocaleString('it-IT', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const fmtKm = (m) => fmt(Math.round(m / 1000));
+  const toNumber = (v) => (typeof v === 'number' ? v : parseFloat(String(v ?? '').replace(',', '.')));
+  const near = (x, ref, tol = TOL) => Math.abs(x - ref) / Math.abs(ref) <= tol;
+
+  function diagnoseA(x) {
+    if (near(x, A / 1000)) return 'Sembra un valore in chilometri: il terminale vuole il semiasse in metri (1 km = 1000 m).';
+    if (near(x, (HEO.hp + HEO.ha) / 2) || near(x, (HEO.hp + HEO.ha) / 2000))
+      return "Hai usato le quote, che sono misurate dalla superficie. Keplero vuole le distanze dal centro della Terra: aggiungi il raggio terrestre sia al perigeo sia all'apogeo.";
+    if (near(x, A - R / 2) || near(x, (A - R / 2) / 1000))
+      return "Hai aggiunto il raggio terrestre una sola volta: va aggiunto sia alla quota del perigeo sia a quella dell'apogeo.";
+    if (near(x, 2 * A) || near(x, (2 * A) / 1000))
+      return "Questo è l'asse maggiore intero (r_p + r_a): il semiasse è la sua metà.";
+
+    if (x < A) {
+      // Stesso apogeo, ellisse più piccola: il perigeo si abbassa
+      const hp2 = 2 * x - ra - R;
+      let where;
+      if (hp2 < 0) where = "sotto la superficie: un'orbita così colpirebbe la Terra";
+      else if (hp2 < 100000) where = `a circa ${fmtKm(hp2)} km di quota, cioè dentro l'atmosfera`;
+      else where = `a circa ${fmtKm(hp2)} km di quota invece di ${fmtKm(HEO.hp)} km`;
+      return `Semiasse troppo piccolo. Un'ellisse con questo a è più corta di quella di Artemis II: mantenendo lo stesso apogeo, il perigeo cadrebbe ${where}. Ricontrolla le distanze dal centro e le unità.`;
+    }
+    const ha2 = 2 * x - rp - R;
+    return `Semiasse troppo grande. Un'ellisse con questo a è più lunga di quella di Artemis II: mantenendo lo stesso perigeo, l'apogeo finirebbe a circa ${fmtKm(ha2)} km di quota invece di ${fmtKm(HEO.ha)} km. Ricontrolla somme e unità di misura.`;
+  }
+
+  function diagnoseT(t, x, aCorrect) {
+    if (!aCorrect) {
+      if (Number.isFinite(x) && x > 0 && near(t, 2 * Math.PI * Math.sqrt(x ** 3 / GM)))
+        return 'Il periodo è coerente con il tuo valore di a, ma a è sbagliato: per la terza legge di Keplero T dipende da a. Correggi prima a, poi ricalcola T.';
+      return 'Il periodo si ricava dal semiasse con la terza legge di Keplero: correggi prima a, poi ricalcola T.';
+    }
+    if (near(t, T / 3600)) return 'Sembra un valore in ore: il terminale vuole i secondi (1 h = 3600 s).';
+    if (near(t, T / 60)) return 'Sembra un valore in minuti: il terminale vuole i secondi (1 min = 60 s).';
+    if (near(t, T * T)) return 'Hai calcolato T²: manca la radice quadrata.';
+    if (near(t, T / (2 * Math.PI))) return 'Manca il fattore 2π: dalla legge si ottiene T = 2π·√(a³/GM).';
+    if (near(t, T / Math.sqrt(1e9)))
+      return 'Hai usato a in chilometri insieme a GM in m³/s²: le unità non sono coerenti. Usa a in metri.';
+    return t < T
+      ? 'Periodo troppo breve per questo semiasse. Per la terza legge di Keplero un periodo più breve corrisponde a un\'orbita più piccola: ricontrolla il cubo di a, la radice quadrata e il valore di GM.'
+      : 'Periodo troppo lungo per questo semiasse. Per la terza legge di Keplero un periodo più lungo corrisponde a un\'orbita più grande: ricontrolla il cubo di a, la radice quadrata e il valore di GM.';
+  }
+
+  function checkCalculations() {
+    const x = toNumber(studentA);
+    const t = toNumber(studentT);
+    const aValid = Number.isFinite(x) && x > 0;
+    const tValid = Number.isFinite(t) && t > 0;
+
+    aOk = aValid && near(x, A);
+    tOk = tValid && near(t, T);
+    aMsg = !aValid ? 'Inserisci un numero valido per il semiasse (maggiore di zero).' : aOk ? 'Semiasse corretto.' : diagnoseA(x);
+    tMsg = !tValid ? 'Inserisci un numero valido per il periodo (maggiore di zero).' : tOk ? 'Periodo corretto.' : diagnoseT(t, x, aOk);
+    checked = true;
 
     if (aOk && tOk) {
-      feedback = "Ottimo lavoro! I parametri orbitali sono corretti. La traiettoria è stabile.";
-      success = true;
-      missionState.update(state => ({
-        ...state,
-        studentCalculations: { semiMajorAxis: inputA, orbitalPeriod: inputT, requiredFuel: 0, isValid: true },
-        status: "Orbita Verificata"
+      missionState.update((s) => ({
+        ...s,
+        studentCalculations: { ...s.studentCalculations, semiMajorAxis: x, orbitalPeriod: t, isValid: true },
+        status: 'Orbita verificata',
       }));
     } else {
-      success = false;
-      let messages = [];
-      
-      if (!aOk) {
-        messages.push(inputA < realA 
-          ? "Il semiasse inserito è troppo piccolo: l'energia meccanica totale non sarebbe sufficiente a mantenere la quota. Orion incontrerebbe gli strati densi dell'atmosfera al perigeo, bruciando per l'attrito cinetico." 
-          : "Il semiasse è eccessivo: l'energia orbitale supererebbe quella di legame gravitazionale. La capsula non rimarrebbe in orbita e verrebbe scagliata nello spazio profondo come un proiettile interplanetario.");
-      }
-      
-      if (!tOk) {
-        messages.push(inputT < realT 
-          ? "Il periodo è troppo breve: questo implicherebbe una velocità orbitale eccessiva per questa quota. Secondo la fisica di Keplero, la forza centrifuga supererebbe l'attrazione terrestre, rendendo la traiettoria instabile." 
-          : "Il periodo è troppo lungo: la velocità orbitale calcolata è insufficiente. Senza una spinta adeguata per contrastare la gravità, la Terra attirerebbe inesorabilmente la capsula verso un impatto al suolo.");
-      }
-      
-      feedback = messages.join(" Inoltre, ");
+      missionState.update((s) => ({
+        ...s,
+        studentCalculations: { ...s.studentCalculations, isValid: false },
+      }));
     }
-  };
+  }
 
-  const closePanel = () => {
-    missionState.update(state => ({ 
-      ...state, 
+  // Si chiude solo dopo una verifica riuscita
+  function confirm() {
+    if (!success) return;
+    missionState.update((s) => ({
+      ...s,
       isAnalyzing: false,
       phase1Complete: true,
-      status: "Orbita Confermata"
+      status: 'Orbita confermata',
     }));
-  };
-
-  const goBack = () => {
-    missionState.update(state => ({ ...state, isAnalyzing: false, showBriefing: true }));
-  };
-
-  const handleKeyDown = (event) => {
-    if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'd') {
-      event.preventDefault();
-      showSecretFormulas = !showSecretFormulas;
-    }
-  };
-
-  onMount(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  });
+  }
 </script>
 
-<div class="max-w-md bg-black/95 backdrop-blur-xl border border-nasa-blue/40 p-10 rounded-3xl shadow-[0_0_50px_rgba(0,50,160,0.3)] text-lunar-gray">
-  <div class="flex items-center gap-4 mb-8">
-    <button 
-      on:click={goBack}
-      class="w-10 h-10 rounded-full border border-gray-600 flex items-center justify-center text-gray-400 hover:border-white hover:text-white transition-all hover:bg-white/5"
-      title="Torna al Briefing"
-    >
-      ←
-    </button>
-    
-    <h3 class="text-xl font-extrabold text-white uppercase tracking-widest flex-1">
-      Terminal Analisi 
-    </h3>
-
-    <div class="flex gap-3">
-      <button 
-        on:click={() => showInfo = !showInfo}
-        class="w-10 h-10 rounded-full border border-nasa-blue flex items-center justify-center text-nasa-blue hover:bg-nasa-blue hover:text-white transition-all shadow-[0_0_15px_rgba(0,50,160,0.2)]"
-        title="Suggerimenti per il ragionamento"
-      >
-        i
-      </button>
-      <button 
-        on:click={closePanel} 
-        class="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-white text-3xl transition-colors"
-      >
-        &times;
-      </button>
-    </div>
+<div class="mc-panel w-full max-w-4xl p-0 overflow-hidden">
+  <div class="px-6 pt-6">
+    <PanelHeader
+      step={1}
+      kicker="Terminale di calcolo · HEO"
+      title="Parametri dell'orbita alta"
+      {onBack}
+      onInfo={() => (showHints = true)}
+    />
   </div>
 
-  {#if showInfo}
-    <div class="mb-8 p-6 bg-nasa-blue/10 border border-nasa-blue/30 rounded-xl text-xs space-y-4 animate-in fade-in slide-in-from-top-4">
-      <div>
-        <span class="text-nasa-blue font-bold uppercase tracking-wider">Costanti Fisiche:</span>
-        <ul class="font-mono mt-2 space-y-1 opacity-90 border-l border-nasa-blue/30 pl-3">
-          <li>Re = {constants.RE / 1000} km</li>
-          <li>GM = {constants.GM.toExponential(3)} m³/s²</li>
-          <li>hp = {constants.hp / 1000} km</li>
-          <li>ha = {constants.ha / 1000} km</li>
-        </ul>
-      </div>
-      <div>
-        <span class="text-nasa-blue font-bold uppercase tracking-wider">Suggerimenti:</span>
-        <p class="mt-2 opacity-90 leading-relaxed italic">
-          1. L'asse maggiore attraversa l'intera Terra. Somma le distanze dal centro per entrambi i punti estremi.<br>
-          2. Il semiasse (a) è esattamente la metà dell'asse maggiore.<br>
-          3. Per il periodo, ricorda che GM è il legame tra spazio (a³) e tempo (T²).
-        </p>
-      </div>
-    </div>
-  {/if}
-
-  {#if showSecretFormulas}
-    <div class="mb-8 p-6 bg-orion-orange/20 border border-orion-orange/40 rounded-xl text-[11px] space-y-3 animate-pulse shadow-[0_0_20px_rgba(255,62,0,0.1)]">
-      <span class="text-orion-orange font-bold uppercase tracking-widest block">[MODALITÀ DOCENTE]</span>
-      <div class="space-y-4">
-        <p class="font-mono text-white leading-loose bg-black/40 p-3 rounded border border-orion-orange/20">
-          a = ((hp + Re) + (ha + Re)) / 2 [m]<br>
-          T = 2 * PI * sqrt(a³ / GM) [s]
-        </p>
-        <div class="grid grid-cols-2 gap-2 text-white/70 font-mono text-[10px]">
-          <div class="bg-black/60 p-2 rounded">
-            RISULTATO a:<br>
-            <span class="text-orion-orange text-xs font-bold">
-              {(((constants.hp + constants.RE) + (constants.ha + constants.RE)) / 2).toFixed(0)} m
-            </span>
-          </div>
-          <div class="bg-black/60 p-2 rounded">
-            RISULTATO T:<br>
-            <span class="text-orion-orange text-xs font-bold">
-              {(2 * Math.PI * Math.sqrt(Math.pow(((constants.hp + constants.RE) + (constants.ha + constants.RE)) / 2, 3) / constants.GM)).toFixed(0)} s
-            </span>
-          </div>
+  <div class="grid md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+    <!-- Dati di missione -->
+    <aside class="bg-panel-2 border-t md:border-t-0 md:border-r border-line p-6 space-y-4">
+      <div class="mc-label">Dati di missione</div>
+      <dl class="space-y-3">
+        <div>
+          <dt class="text-xs text-muted uppercase">Raggio terrestre R<sub>T</sub></dt>
+          <dd class="mc-data text-lg">{fmt(R)} m</dd>
         </div>
+        <div>
+          <dt class="text-xs text-muted uppercase">Quota perigeo h<sub>p</sub></dt>
+          <dd class="mc-data text-lg">{fmt(HEO.hp)} m</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-muted uppercase">Quota apogeo h<sub>a</sub></dt>
+          <dd class="mc-data text-lg">{fmt(HEO.ha)} m</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-muted uppercase">GM della Terra</dt>
+          <dd class="mc-data text-lg"><span use:math={{ expression: `${String(GM / 1e14).replace('.', '{,}')} \\times 10^{14}\\ \\text{m}^3/\\text{s}^2` }}></span></dd>
+        </div>
+      </dl>
+      <div class="mc-card text-sm space-y-2">
+        <div class="flex justify-center" use:math={{ expression: 'a = \\frac{r_p + r_a}{2}', displayMode: true }}></div>
+        <div class="flex justify-center" use:math={{ expression: '\\frac{T^2}{a^3} = \\frac{4\\pi^2}{GM}', displayMode: true }}></div>
       </div>
-    </div>
-  {/if}
+    </aside>
 
-  <div class="space-y-6">
-    <div class="space-y-2">
-      <label for="semiMajorAxis" class="block text-xs text-nasa-blue font-bold tracking-widest pl-1">SEMIASSE MAGGIORE (a) [m]</label>
-      <input 
-        id="semiMajorAxis"
-        type="number" 
-        bind:value={studentA}
-        placeholder="Valore in m..."
-        class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white font-mono focus:border-nasa-blue focus:bg-nasa-blue/5 outline-none transition-all"
-      />
-    </div>
-
-    <div class="space-y-2">
-      <label for="orbitalPeriod" class="block text-xs text-nasa-blue font-bold tracking-widest pl-1">PERIODO ORBITALE (T) [s]</label>
-      <input 
-        id="orbitalPeriod"
-        type="number" 
-        bind:value={studentT}
-        placeholder="Valore in s..."
-        class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white font-mono focus:border-nasa-blue focus:bg-nasa-blue/5 outline-none transition-all"
-      />
-    </div>
-
-    {#if feedback}
-      <div class="p-4 rounded-xl text-xs font-bold {success ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'} animate-in zoom-in-95">
-        {feedback}
+    <!-- Input e verifica -->
+    <section class="p-6 space-y-5">
+      <div class="space-y-2">
+        <label for="semiMajorAxis" class="mc-label block">Semiasse maggiore a</label>
+        <div class="flex items-center gap-3">
+          <input id="semiMajorAxis" class="mc-input" type="number" step="any" bind:value={studentA} placeholder="es. 12345678.9" />
+          <span class="mc-data text-signal w-8">m</span>
+        </div>
+        {#if checked && aMsg}
+          <p class="text-sm {aOk ? 'text-ok' : 'text-fail'}">{aMsg}</p>
+        {/if}
       </div>
-    {/if}
 
-    <button 
-      on:click={checkCalculations}
-      class="w-full bg-nasa-blue hover:bg-blue-600 text-white py-4 rounded-xl font-bold transition-all transform hover:scale-[1.02] active:scale-95 uppercase tracking-widest text-xs shadow-lg shadow-blue-900/20"
-    >
-      Verifica Orbita
-    </button>
+      <div class="space-y-2">
+        <label for="orbitalPeriod" class="mc-label block">Periodo orbitale T</label>
+        <div class="flex items-center gap-3">
+          <input id="orbitalPeriod" class="mc-input" type="number" step="any" bind:value={studentT} placeholder="es. 12345.6" />
+          <span class="mc-data text-signal w-8">s</span>
+        </div>
+        {#if checked && tMsg}
+          <p class="text-sm {tOk ? 'text-ok' : 'text-fail'}">{tMsg}</p>
+        {/if}
+      </div>
 
-    {#if success}
-      <button 
-        on:click={closePanel}
-        class="w-full border border-white/20 hover:bg-white/10 text-white py-4 rounded-xl font-bold transition-all uppercase tracking-widest text-xs"
-      >
-        Conferma e Prosegui
-      </button>
-    {/if}
+      <p class="text-xs text-muted">
+        Scrivi i numeri con il punto per i decimali (es. 1234.5). Tolleranza accettata: ±2% rispetto al valore esatto.
+      </p>
+
+      {#if checked}
+        <div class="{success ? 'mc-feedback-ok' : 'mc-feedback-fail'} text-sm" role="status">
+          {#if success}
+            Parametri orbitali corretti. Il periodo vale circa {fmt(T / 3600, 1)} ore: Orion impiega quasi un giorno per percorrere
+            l'ellisse, veloce vicino al perigeo e lenta vicino all'apogeo.
+          {:else}
+            Qualcosa non torna: leggi i messaggi sotto ciascun campo, correggi e verifica di nuovo.
+          {/if}
+        </div>
+      {/if}
+
+      <div class="flex flex-col sm:flex-row gap-3">
+        <button type="button" class="mc-btn mc-btn-primary flex-1" onclick={checkCalculations}>Verifica orbita</button>
+        {#if success}
+          <button type="button" class="mc-btn mc-btn-go flex-1" onclick={confirm}>Avvia la simulazione</button>
+        {/if}
+      </div>
+
+      <TeacherBox>
+        <div class="space-y-2 text-lunar-gray">
+          <div use:math={{ expression: `a = \\frac{(R_T + h_p) + (R_T + h_a)}{2} = ${fmt(A).replace(/\./g, '{.}')}\\ \\text{m}` }}></div>
+          <div use:math={{ expression: `T = 2\\pi\\sqrt{\\frac{a^3}{GM}} \\approx ${fmt(T).replace(/\./g, '{.}')}\\ \\text{s} \\approx ${fmt(T / 3600, 1).replace(',', '{,}')}\\ \\text{h}` }}></div>
+          <p class="text-xs text-muted">Accettati valori entro ±2% (a: {fmt(A * 0.98)}–{fmt(A * 1.02)} m; T: {fmt(T * 0.98)}–{fmt(T * 1.02)} s).</p>
+        </div>
+      </TeacherBox>
+    </section>
   </div>
 </div>
+
+<HintsModal open={showHints} onClose={() => (showHints = false)}>
+  <p>
+    <strong class="text-white">1. Dal centro, non dalla superficie.</strong> Le quote h<sub>p</sub> e h<sub>a</sub> partono dal suolo.
+    Per ottenere le distanze dal centro della Terra aggiungi a ciascuna il raggio terrestre: r<sub>p</sub> = R<sub>T</sub> + h<sub>p</sub>,
+    r<sub>a</sub> = R<sub>T</sub> + h<sub>a</sub>.
+  </p>
+  <p>
+    <strong class="text-white">2. L'asse maggiore.</strong> Perigeo e apogeo stanno da parti opposte della Terra: il segmento che li unisce
+    passando per il centro è lungo r<sub>p</sub> + r<sub>a</sub>. Il semiasse a è la metà.
+  </p>
+  <p>
+    <strong class="text-white">3. Il periodo.</strong> Isola T nella terza legge di Keplero: T² = 4π²·a³/GM, poi fai la radice quadrata.
+    Usa a in metri, così con GM in m³/s² ottieni T in secondi.
+  </p>
+  <p class="text-muted">Controllo di buon senso: il risultato dovrebbe essere di circa un giorno. Dividi per 3600 per averlo in ore.</p>
+</HintsModal>
