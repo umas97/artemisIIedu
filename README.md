@@ -11,25 +11,35 @@ Un simulatore interattivo cross-platform (Windows, macOS, Linux) dedicato alla m
 Il cuore di questo progetto è il suo **valore educativo**. Non si tratta solo di un'animazione, ma di uno strumento progettato per le scuole e l'apprendimento delle materie STEM (Fisica, Matematica, Scienze).
 
 - **Fisica e Meccanica Orbitale:** Il programma permette di comprendere concretamente i calcoli e le grandezze dietro alle manovre spaziali, come l'Iniezione Trans-Lunare (TLI - Trans-Lunar Injection).
-- **Modalità Docente (Teacher Mode):** Una speciale modalità dedicata che mostra in tempo reale le formule fisiche e matematiche che governano la simulazione (ad es. calcolo del $\Delta v$, raggio terrestre, altitudine del perigeo, parametro gravitazionale). Le formule sono renderizzate in formato accademico per essere facilmente spiegate in classe.
+- **Modalità Docente (Ctrl + Shift + D):** Una speciale modalità dedicata che mostra in tempo reale le formule fisiche e matematiche che governano la simulazione (ad es. calcolo del $\Delta v$, raggio terrestre, altitudine del perigeo, parametro gravitazionale). Le formule sono renderizzate in formato accademico per essere facilmente spiegate in classe.
 - **Apprendimento Interattivo:** Gli studenti possono osservare l'impatto dei parametri fisici sull'andamento della missione, collegando in modo diretto la teoria studiata sui libri a una simulazione visiva in tempo reale.
 
-## 🌕 Le Fasi della simulazione (Artemis II)
+## 🌕 Le Fasi della simulazione
 
-Il simulatore riproduce l'intero viaggio della navicella Orion, guidando l'utente attraverso **fasi distinte e interattive**, ognuna utile per spiegare un diverso concetto scientifico:
+Il simulatore guida lo studente attraverso **sei fasi**. Ognuna ha un briefing teorico (il problema e gli strumenti per risolverlo, senza la soluzione) e un terminale di calcolo: la simulazione usa i valori inseriti dallo studente, giusti o sbagliati che siano, e mostra le conseguenze.
 
-- **Fase 1 (Lancio e Ascesa):** Il decollo del razzo dalla Terra. Serve a introdurre i parametri base della missione e far percepire l'inizio dell'esplorazione spaziale.
-- **Fase 2 (Orbita di Parcheggio Terrestre):** La navicella si inserisce in un'orbita temporanea attorno al nostro pianeta. Qui gli studenti possono familiarizzare con concetti geometrici come l'altitudine del perigeo e il moto circolare/ellittico.
-- **Fase 3 (Iniezione Trans-Lunare - TLI):** Il momento in cui i motori si accendono per sfuggire all'orbita terrestre. Dal punto di vista didattico è la fase più importante: attivando la Modalità Docente si osserva in tempo reale il calcolo del _Delta-v_ ($\Delta v$), la grande variazione di velocità necessaria per la manovra.
-- **Fase 4 (Viaggio verso la Luna):** Il transito nello spazio profondo. Questa visualizzazione aiuta gli studenti a percepire e comprendere concretamente l'immensa distanza tra la Terra e la Luna (circa 384.400 km).
-- **Fase 5 (Sorvolo Lunare - Flyby):** La navicella aggira la Luna senza atterrare. Sfrutta l'attrazione gravitazionale lunare per invertire la rotta e farsi "spingere" indietro verso casa. È l'occasione perfetta per spiegare in classe l'effetto fionda gravitazionale (_gravity assist_).
-- **Fase 6 (Rientro e Ammaraggio):** La missione si conclude con il ritorno sicuro sulla Terra. Al termine, la simulazione può essere ripetuta o chiusa.
-- **Flight plan (Piano di Volo):** Alla fine del viaggio, il software genera un report riassuntivo stampabile. È pensato appositamente per le scuole: documenta tutti i passaggi svolti e può essere usato dai docenti come scheda di laboratorio per assegnare esercizi sui dati raccolti dagli studenti.
+| Fase | Manovra | Concetti di fisica |
+|---|---|---|
+| 1 · Checkout orbitale | Analisi dell'orbita alta (HEO) di Artemis II | Ellisse, perigeo/apogeo, semiasse maggiore, terza legge di Keplero |
+| 2 · Lancio SLS | Calcolo del propellente del core stage | Equazione del razzo di Tsiolkovsky, impulso specifico |
+| 3 · Iniezione trans-lunare (TLI) | Δv per raggiungere la distanza della Luna | Equazione vis-viva, orbita di trasferimento |
+| 4 · Inserimento in orbita lunare (LOI) | Frenata per farsi catturare dalla Luna | Velocità circolare, energia orbitale |
+| 5 · Ritorno (TEI) | Δv minimo per sfuggire alla Luna | Velocità di fuga |
+| 6 · Rientro e ammaraggio | Angolo di rientro e paracadute | Resistenza aerodinamica, decelerazione, velocità limite |
+
+> **Nota:** la missione Artemis II reale non entra in orbita lunare: compie un sorvolo con traiettoria di **libero ritorno** (*free-return*). Le fasi 4 e 5 sono un esercizio sull'orbita lunare, come nelle missioni Apollo e nelle future Artemis III+. L'app lo segnala agli studenti.
+
+Al termine il software genera il **Flight Plan**, un report stampabile con la tabella dei nodi di manovra, il consumo di propellente (Tsiolkovsky) e lo schema della traiettoria: si può usare come scheda di laboratorio.
+
+### Modalità Docente
+
+Premi **Ctrl + Shift + D** in qualsiasi momento per mostrare formule e soluzioni attese nei terminali di calcolo. Con **Ctrl + 1 … 6** si salta direttamente a una fase (utile per le dimostrazioni in classe).
 
 ## ✨ Caratteristiche Principali
 
-- **Simulazione a Fasi:** Suddivisione rigorosa della missione Artemis II in diverse fasi sequenziali e interattive.
-- **Rappresentazione Visiva:** Utilizza il motore **Phaser** per le simulazioni spaziali e le dinamiche orbitali.
+- **Simulazione a Fasi:** Sei fasi sequenziali e interattive, dal lancio all'ammaraggio.
+- **Rappresentazione Visiva:** Scene **Phaser** con grafica procedurale (nessun file immagine), zoom con la rotella e trascinamento della vista.
+- **Pensato per l'aula:** Interfaccia ad alto contrasto che si adatta allo schermo, leggibile su LIM e proiettore.
 - **Report di Volo (Flight Plan):** Generazione, consultazione e stampa di un "Flight Plan" dettagliato che riassume i progressi della missione, perfetto per attività di laboratorio.
 - **Esperienza Nativa:** Progettato come un software desktop leggero e performante, utilizzabile anche offline nelle aule scolastiche.
 
@@ -42,6 +52,17 @@ Questo progetto combina tecnologie web moderne con un framework per la creazione
 - **[Phaser](https://phaser.io/)**: Per il rendering visivo e la gestione della scena spaziale.
 - **[KaTeX](https://katex.org/)**: Per la formattazione tipografica professionale delle formule matematiche all'interno della UI.
 - **[Tailwind CSS](https://tailwindcss.com/)**: Per un design rapido, reattivo e coerente.
+
+---
+
+## 🛠️ Sviluppo
+
+```bash
+npm install
+npm run dev          # versione web su http://localhost:5173
+npm run tauri dev    # app desktop
+npm run tauri build  # eseguibili
+```
 
 ---
 
