@@ -1,29 +1,30 @@
 import { writable } from 'svelte/store';
+import { EARTH, MOON, HEO, CORE_STAGE, G0 } from '../physics/constants.js';
 
 export const missionState = writable({
-  currentPhase: 1, // 1: Preparazione, 2: Lancio, 3: TLI, 4: Iniezione Lunare
+  currentPhase: 1, // 1 HEO, 2 Lancio, 3 TLI, 4 LOI, 5 TEI, 6 Rientro
   status: "In attesa di calcoli",
   
-  // Parametri SLS Block 1 (Semplificati per scopi didattici)
+  // Modello semplificato del core stage SLS (vedi physics/constants.js)
   rocket: {
-    dryMass: 150000,     // kg (Massa senza carburante)
-    fuelMass: 2000000,   // kg (Capacità massima carburante)
-    isp: 363,            // s (Impulso specifico motori RS-25)
-    g0: 9.80665,         // m/s^2
-    targetDeltaV: 9500,  // m/s (Delta-v necessario per orbita HEO)
+    dryMass: CORE_STAGE.dryMass,
+    fuelMass: CORE_STAGE.tankCapacity,
+    isp: CORE_STAGE.isp,
+    g0: G0,
+    targetDeltaV: CORE_STAGE.targetDeltaV,
   },
 
   constants: {
-    RE: 6371000, // m
-    GM: 3.986e14, // m^3/s^2 (Terra)
-    hp: 192000, // m (Altitudine parcheggio)
-    ha: 70174000, // m
-    distanceEarthMoon: 384400000, // m
-    moonRadius: 1737000, // m
-    GMMoon: 4.9048e12, // m^3/s^2 (Luna)
-    h_moon_orbit: 100000 // m (Altitudine parcheggio lunare)
+    RE: EARTH.R,
+    GM: EARTH.GM,
+    hp: HEO.hp,
+    ha: HEO.ha,
+    distanceEarthMoon: MOON.distance,
+    moonRadius: MOON.R,
+    GMMoon: MOON.GM,
+    h_moon_orbit: MOON.orbitAltitude,
   },
-  
+
   studentCalculations: {
     semiMajorAxis: 0,
     orbitalPeriod: 0,

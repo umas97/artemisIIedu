@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "artemis-simulator",
+  "productName": "Artemis II Simulatore",
   "version": "1.0.1",
   "identifier": "com.artemisii.simulator",
   "build": {
@@ -12,11 +12,14 @@
   "app": {
     "windows": [
       {
-        "title": "Artemis II Simulator",
-        "width": 800,
-        "height": 600,
+        "title": "Artemis II – Simulatore didattico",
+        "width": 1366,
+        "height": 800,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "minWidth": 1024,
+        "minHeight": 640,
+        "center": true
       }
     ],
     "security": {

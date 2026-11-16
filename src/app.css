@@ -1,38 +1,300 @@
 @import "tailwindcss";
 @import "katex/dist/katex.min.css";
+@import "@fontsource-variable/inter/index.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/700.css";
 
+/*
+ * Design system "Mission Control"
+ * - nasa-blue: pulsanti, bordi, superfici di accento (testo bianco sopra ha contrasto AA)
+ * - signal:    testo/etichette di accento su sfondo scuro (alto contrasto per LIM)
+ * - orion-orange: SOLO azioni principali e allarmi
+ * - ok / warn / fail: esiti delle verifiche
+ */
 @theme {
-  --color-space-black: #050505;
-  --color-nasa-blue: #0032a0;
-  --color-orion-orange: #ff3e00;
-  --color-lunar-gray: #e1e1e1;
+  --font-sans: "Inter Variable", system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --color-space-black: #04060b;
+  --color-panel: #0a1120;
+  --color-panel-2: #0f1a2e;
+  --color-line: #1e2b44;
+  --color-nasa-blue: #2563d9;
+  --color-signal: #8ab8ff;
+  --color-orion-orange: #ff6a2b;
+  --color-lunar-gray: #e4e9f2;
+  --color-muted: #94a3bb;
+  --color-ok: #34d399;
+  --color-warn: #fbbf24;
+  --color-fail: #f87171;
 }
 
 :root {
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  font-family: var(--font-sans);
+  line-height: 1.55;
   font-weight: 400;
-
   color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--color-lunar-gray);
   background-color: var(--color-space-black);
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Scala tutta l'interfaccia (rem) con lo schermo: leggibile su LIM e su 1366x768 */
+  font-size: clamp(14px, 0.45vw + 9px, 19px);
 }
 
+html,
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
-  min-height: 100vh;
+  height: 100%;
   overflow: hidden;
+  background: var(--color-space-black);
 }
 
 #app {
   width: 100%;
   height: 100vh;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-nasa-blue) 60%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 2px;
+}
+
+/* Barre di scorrimento discrete nei pannelli */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+
+/* Gli input numerici non mostrano le frecce: si scrivono valori grandi */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+@layer components {
+  /* Contenitore principale di briefing e terminali */
+  .mc-panel {
+    position: relative;
+    background: color-mix(in srgb, var(--color-panel) 94%, transparent);
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.02) inset,
+      0 24px 60px -20px rgb(0 0 0 / 0.8);
+    color: var(--color-lunar-gray);
+    max-height: calc(100vh - 2.5rem);
+    overflow-y: auto;
+  }
+  /* Angoli "da console" */
+  .mc-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background:
+      linear-gradient(var(--color-signal), var(--color-signal)) top left / 14px 2px,
+      linear-gradient(var(--color-signal), var(--color-signal)) top left / 2px 14px,
+      linear-gradient(var(--color-signal), var(--color-signal)) bottom right / 14px 2px,
+      linear-gradient(var(--color-signal), var(--color-signal)) bottom right / 2px 14px;
+    background-repeat: no-repeat;
+    opacity: 0.55;
+  }
+
+  /* Riquadro interno (dati, formule, suggerimenti) */
+  .mc-card {
+    background: var(--color-panel-2);
+    border: 1px solid var(--color-line);
+    border-radius: 0.5rem;
+    padding: 1rem;
+  }
+
+  /* Etichetta piccola maiuscola in stile telemetria */
+  .mc-label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-signal);
+  }
+
+  .mc-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: #fff;
+    line-height: 1.15;
+  }
+
+  .mc-data {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+  }
+
+  .mc-input {
+    width: 100%;
+    background: var(--color-space-black);
+    border: 1px solid var(--color-line);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    color: #fff;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .mc-input:focus {
+    border-color: var(--color-signal);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-signal) 20%, transparent);
+  }
+
+  .mc-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, transform 0.1s, opacity 0.15s;
+  }
+  .mc-btn:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  .mc-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .mc-btn-primary {
+    background: var(--color-nasa-blue);
+    color: #fff;
+  }
+  .mc-btn-primary:hover:not(:disabled) {
+    background: #3474ea;
+  }
+  .mc-btn-go {
+    background: var(--color-orion-orange);
+    color: #160800;
+  }
+  .mc-btn-go:hover:not(:disabled) {
+    background: #ff8350;
+  }
+  .mc-btn-ok {
+    background: var(--color-ok);
+    color: #03140d;
+  }
+  .mc-btn-ok:hover:not(:disabled) {
+    background: #5ee0b0;
+  }
+  .mc-btn-fail {
+    background: transparent;
+    color: var(--color-fail);
+    border-color: color-mix(in srgb, var(--color-fail) 55%, transparent);
+  }
+  .mc-btn-fail:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-fail) 12%, transparent);
+  }
+  .mc-btn-ghost {
+    background: transparent;
+    color: var(--color-lunar-gray);
+    border-color: var(--color-line);
+  }
+  .mc-btn-ghost:hover:not(:disabled) {
+    border-color: var(--color-muted);
+    background: rgb(255 255 255 / 0.04);
+  }
+
+  /* Pulsante tondo per icone (info, chiudi, indietro) */
+  .mc-icon-btn {
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid var(--color-line);
+    color: var(--color-muted);
+    background: transparent;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+  }
+  .mc-icon-btn:hover {
+    color: #fff;
+    border-color: var(--color-signal);
+    background: rgb(255 255 255 / 0.04);
+  }
+
+  .mc-feedback-ok {
+    border: 1px solid color-mix(in srgb, var(--color-ok) 40%, transparent);
+    background: color-mix(in srgb, var(--color-ok) 10%, transparent);
+    color: var(--color-ok);
+    border-radius: 0.5rem;
+    padding: 0.85rem 1rem;
+  }
+  .mc-feedback-fail {
+    border: 1px solid color-mix(in srgb, var(--color-fail) 40%, transparent);
+    background: color-mix(in srgb, var(--color-fail) 10%, transparent);
+    color: #fecaca;
+    border-radius: 0.5rem;
+    padding: 0.85rem 1rem;
+  }
+
+  /* Riquadro "Modalità Docente" */
+  .mc-teacher {
+    border: 1px dashed color-mix(in srgb, var(--color-warn) 60%, transparent);
+    background: color-mix(in srgb, var(--color-warn) 8%, transparent);
+    border-radius: 0.5rem;
+    padding: 1rem;
+  }
+  .mc-teacher .mc-label {
+    color: var(--color-warn);
+  }
+
+  .katex {
+    font-size: 1.12em;
+  }
+}
+
+@keyframes mc-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.mc-enter {
+  animation: mc-fade-up 0.25s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

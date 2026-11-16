@@ -1,7 +1,6 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import * as Phaser from 'phaser';
-  import { BootScene } from './scenes/BootScene.js';
   import { EarthOrbitScene } from './scenes/EarthOrbitScene.js';
   import { LaunchScene } from './scenes/LaunchScene.js';
   import { TLIScene } from './scenes/TLIScene.js';
@@ -29,8 +28,8 @@
           debug: false
         }
       },
-      scene: [EarthOrbitScene, LaunchScene, TLIScene, LOIScene, TEIScene, ReentryScene, BootScene],
-      backgroundColor: '#050505',
+      scene: [EarthOrbitScene, LaunchScene, TLIScene, LOIScene, TEIScene, ReentryScene],
+      backgroundColor: '#04060b',
       fps: {
         target: 60,
         forceSetTimeOut: true
@@ -45,13 +44,6 @@
 
     game = new Phaser.Game(config);
 
-    const handleResize = () => {
-      if (game && game.scale) {
-        game.scale.resize(window.innerWidth, window.innerHeight);
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
 
     const loader = document.getElementById('initial-loader');
     if (loader) {
@@ -59,9 +51,6 @@
       setTimeout(() => loader.remove(), 500);
     }
 
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
   });
 
   onDestroy(() => {
@@ -82,7 +71,7 @@
     height: 100vh;
     z-index: 0;
     overflow: hidden;
-    background-color: #000;
+    background-color: #04060b;
   }
 
   :global(canvas) {
