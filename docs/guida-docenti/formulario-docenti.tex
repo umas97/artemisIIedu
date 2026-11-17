@@ -1,0 +1,505 @@
+% Artemis II - Simulatore didattico
+% Formulario e procedimenti per il docente
+% Compilazione: latexmk -pdf formulario-docenti.tex
+\documentclass[11pt,a4paper]{article}
+
+% --- Lingua, caratteri, impaginazione -------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,top=2.4cm,bottom=2.4cm,left=2.5cm,right=2.5cm,headheight=14pt]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{icomma}
+\usepackage[locale=DE,group-digits=integer,group-minimum-digits=4,group-separator={.},output-decimal-marker={,},per-mode=symbol]{siunitx}
+\usepackage{booktabs,tabularx,array}
+\usepackage{enumitem}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+% --- Colori e stili ---------------------------------------------------------
+\definecolor{mcblu}{HTML}{1F4E79}
+\definecolor{mcgrigio}{HTML}{5A6270}
+\definecolor{mcchiaro}{HTML}{EEF3F8}
+\definecolor{mcok}{HTML}{2E7D32}
+\definecolor{mcnota}{HTML}{FFF6E0}
+
+\newcommand{\fasenuova}{\clearpage}
+\titleformat{\section}{\Large\bfseries\color{mcblu}}{Fase~\thesection}{0.8em}{}[\vspace{-0.4em}\textcolor{mcblu}{\rule{\linewidth}{0.6pt}}]
+\titleformat{\subsection}{\normalsize\bfseries\color{mcblu}}{}{0em}{}
+\titlespacing*{\section}{0pt}{1.6em}{0.9em}
+\titlespacing*{\subsection}{0pt}{1.0em}{0.35em}
+
+\newcommand{\sezionelibera}[1]{%
+  \section*{\texorpdfstring{#1}{#1}}\addcontentsline{toc}{section}{#1}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{mcgrigio}Artemis II -- Simulatore didattico}
+\fancyhead[R]{\small\color{mcgrigio}Formulario per il docente}
+\fancyfoot[C]{\small\color{mcgrigio}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\setlist{itemsep=0.15em,topsep=0.3em}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.45em}
+
+% Riquadro delle formule della fase
+\newtcolorbox{formule}{enhanced,colback=mcchiaro,colframe=mcblu,boxrule=0.6pt,arc=2pt,
+  left=8pt,right=8pt,top=4pt,bottom=4pt,title=Formule,fonttitle=\bfseries\small,
+  coltitle=white,colbacktitle=mcblu}
+% Riquadro del risultato atteso
+\newtcolorbox{risultato}{enhanced,colback=white,colframe=mcok,boxrule=0.6pt,arc=2pt,
+  left=8pt,right=8pt,top=4pt,bottom=4pt,title=Risultato atteso,fonttitle=\bfseries\small,
+  coltitle=white,colbacktitle=mcok}
+% Nota sul modello (semplificazioni rispetto alla missione reale)
+\newtcolorbox{modello}{enhanced,colback=mcnota,colframe=Goldenrod!70!black,boxrule=0.4pt,arc=2pt,
+  left=8pt,right=8pt,top=3pt,bottom=3pt,fontupper=\small}
+
+% Tabella dei dati: grandezza | simbolo | valore
+\newenvironment{dati}{\par\small\tabularx{\linewidth}{@{}X l r@{}}\toprule
+  \textbf{Grandezza} & \textbf{Simbolo} & \textbf{Valore}\\\midrule}{\bottomrule\endtabularx\par}
+
+\newcommand{\dv}{\Delta v}
+
+\hypersetup{pdftitle={Artemis II - Formulario e procedimenti per il docente},
+  pdfauthor={Artemis II Simulatore didattico}}
+
+% ===========================================================================
+\begin{document}
+
+\begin{center}
+  {\color{mcgrigio}\small\scshape Artemis II -- Simulatore didattico}\\[0.6em]
+  {\LARGE\bfseries\color{mcblu} Formulario e procedimenti per il docente}\\[0.5em]
+  {\normalsize Le formule di ogni fase, i passaggi da far svolgere e i risultati attesi}
+\end{center}
+\vspace{0.6em}
+
+\sezionelibera{Come usare questo documento}
+
+Per ciascuna delle sei fasi trovate: i \textbf{dati} che l'app fornisce allo studente, le \textbf{formule} necessarie,
+il \textbf{procedimento} suggerito (lo stesso ordine dei suggerimenti dell'app), il \textbf{risultato atteso} con la
+tolleranza applicata e gli \textbf{errori frequenti} che il terminale riconosce. I numeri riportati sono quelli calcolati
+dall'app con le stesse costanti.
+
+\textbf{Convenzioni comuni a tutte le fasi}
+\begin{itemize}
+  \item Tutte le grandezze in unità SI: distanze in metri, tempi in secondi, masse in kilogrammi.
+  \item Le \emph{quote} $h$ sono misurate dalla superficie; le formule orbitali usano le \emph{distanze dal centro}
+        del corpo attorno a cui si orbita: $r = R + h$.
+  \item Nell'app i numeri si inseriscono con il punto decimale (es.\ \texttt{1234.5}).
+  \item \textbf{Modalità docente}: la combinazione \texttt{Ctrl+Shift+D} mostra formule e soluzioni
+        nei terminali di calcolo; con \texttt{Ctrl+1}, \dots, \texttt{Ctrl+6} si salta direttamente a una fase.
+\end{itemize}
+
+\subsection{Costanti usate dall'app}
+\begin{dati}
+  Raggio medio della Terra & $R_T$ & \SI{6371}{km}\\
+  Parametro gravitazionale della Terra & $GM_T$ & \SI{3.986e14}{m^3/s^2}\\
+  Raggio della Luna & $R_L$ & \SI{1737}{km}\\
+  Parametro gravitazionale della Luna & $GM_L$ & \SI{4.9048e12}{m^3/s^2}\\
+  Distanza Terra--Luna (centro--centro) & $D$ & \SI{384400}{km}\\
+  Accelerazione di gravità standard & $g_0$ & \SI{9.80665}{m/s^2}\\
+\end{dati}
+
+\smallskip
+\begin{modello}
+\textbf{Perché $GM$ e non $G$ e $M$ separati.} Il prodotto $GM$ è noto con precisione molto maggiore dei due fattori e
+semplifica i calcoli. Nel briefing della fase~1 l'app mostra comunque $G = \SI{6.674e-11}{N.m^2/kg^2}$ e
+$M_T = \SI{5.972e24}{kg}$, così gli studenti possono verificare che $GM_T \approx \SI{3.986e14}{m^3/s^2}$.
+\end{modello}
+
+% ===========================================================================
+\fasenuova
+\section{Checkout orbitale: l'orbita alta (HEO)}
+
+\textbf{Obiettivo.} Calcolare semiasse maggiore e periodo dell'orbita ellittica su cui Orion verifica i sistemi.\\
+\textbf{Concetti.} Ellisse, perigeo e apogeo, terza legge di Keplero.
+
+\subsection{Dati}
+\begin{dati}
+  Quota del perigeo & $h_p$ & \SI{192}{km}\\
+  Quota dell'apogeo & $h_a$ & \SI{70174}{km}\\
+  Raggio terrestre, $GM$ della Terra & $R_T$, $GM_T$ & vedi costanti\\
+\end{dati}
+
+\begin{formule}
+\[
+  r_p = R_T + h_p \qquad r_a = R_T + h_a \qquad a = \frac{r_p + r_a}{2}
+\]
+\[
+  \frac{T^2}{a^3} = \frac{4\pi^2}{GM_T}
+  \quad\Longrightarrow\quad
+  T = 2\pi\sqrt{\frac{a^3}{GM_T}}
+\]
+\end{formule}
+
+\subsection{Procedimento}
+\begin{enumerate}
+  \item Passare dalle quote alle distanze dal centro, aggiungendo $R_T$ a \emph{entrambe}:\\
+        $r_p = \SI{6563000}{m}$, \quad $r_a = \SI{76545000}{m}$.
+  \item L'asse maggiore unisce perigeo e apogeo passando per il centro della Terra (che è un fuoco):
+        è lungo $r_p + r_a$. Il semiasse è la metà.
+  \item Isolare $T$ nella terza legge di Keplero e sostituire $a$ \emph{in metri}, così $T$ esce in secondi.
+  \item Controllo di buon senso: convertire in ore ($T/3600$), il risultato è di circa un giorno.
+\end{enumerate}
+
+\begin{risultato}
+$a = \SI{41554000}{m}$ \qquad $T \approx \SI{84300}{s} \approx \SI{23.4}{h}$\\[0.2em]
+{\small Tolleranza dell'app: $\pm 2\%$ su entrambi i valori. La simulazione parte solo se sono corretti entrambi.}
+\end{risultato}
+
+\subsection{Errori frequenti riconosciuti dall'app}
+\begin{itemize}
+  \item Semiasse calcolato con le quote anziché con le distanze dal centro, oppure $R_T$ aggiunto una sola volta.
+  \item Asse maggiore intero ($r_p + r_a$) al posto del semiasse.
+  \item Risultato in km invece che in m; periodo in ore o minuti invece che in secondi.
+  \item Periodo senza radice ($T^2$) o senza il fattore $2\pi$.
+  \item $a$ in km con $GM$ in \si{m^3/s^2}: unità incoerenti (errore di un fattore $\sqrt{10^9}$).
+\end{itemize}
+
+\begin{modello}
+Nella missione reale l'orbita alta si raggiunge in due passi: il lancio porta Orion in un'orbita più bassa e lo stadio
+superiore ICPS solleva poi l'apogeo a circa \SI{70000}{km}.
+\end{modello}
+
+% ===========================================================================
+\fasenuova
+\section{Lancio SLS: equazione di Tsiolkovsky}
+
+\textbf{Obiettivo.} Calcolare la massa di propellente da caricare nel \emph{core stage} per ottenere il $\dv$ richiesto.\\
+\textbf{Concetti.} Conservazione della quantità di moto, impulso specifico, logaritmo ed esponenziale.
+
+\subsection{Dati}
+\begin{dati}
+  Massa finale (stadio vuoto + carico) & $m_{dry}$ & \SI{150000}{kg}\\
+  Impulso specifico RS-25 nel vuoto & $I_{sp}$ & \SI{452}{s}\\
+  Variazione di velocità richiesta & $\dv$ & \SI{9500}{m/s}\\
+  Accelerazione di gravità standard & $g_0$ & \SI{9.80665}{m/s^2}\\
+\end{dati}
+
+\begin{formule}
+\[
+  \dv = I_{sp}\, g_0 \ln\frac{m_{iniziale}}{m_{finale}}
+  \qquad m_{iniziale} = m_{dry} + m_{fuel},\quad m_{finale} = m_{dry}
+\]
+\[
+  m_{fuel} = m_{dry}\left(e^{\dv/(I_{sp}\,g_0)} - 1\right)
+\]
+\end{formule}
+
+Il prodotto $v_e = I_{sp}\,g_0$ è la velocità efficace dei gas di scarico (qui $v_e \approx \SI{4433}{m/s}$).
+
+\subsection{Procedimento}
+\begin{enumerate}
+  \item Dividere entrambi i membri per $I_{sp}\,g_0$: a sinistra resta un numero puro,
+        $\dfrac{\dv}{I_{sp}\,g_0} \approx \num{2.143}$.
+  \item Eliminare il logaritmo con l'esponenziale (se $\ln x = k$ allora $x = e^k$): si ottiene il
+        \emph{rapporto di massa} $\dfrac{m_{dry}+m_{fuel}}{m_{dry}} \approx \num{8.53}$.
+  \item Moltiplicare per $m_{dry}$ e sottrarre $m_{dry}$.
+  \item Controllo di buon senso: il razzo pieno pesa diverse volte il razzo vuoto.
+\end{enumerate}
+
+\begin{risultato}
+$m_{fuel} \approx \SI{1129000}{kg}$ \; (circa \SI{1129}{t})\\[0.2em]
+{\small Tolleranza dell'app: $\pm 2\%$. Con un valore errato il terminale indica il $\dv$ che si otterrebbe davvero.}
+\end{risultato}
+
+\subsection{Errori frequenti riconosciuti dall'app}
+\begin{itemize}
+  \item Inserita la massa iniziale totale ($m_{dry} + m_{fuel}$) invece del solo propellente.
+  \item Valore in tonnellate invece che in kilogrammi.
+  \item $g_0$ dimenticato nell'esponente (risultato enorme).
+  \item Rapporto delle masse invertito: $m_{dry}\bigl(1 - e^{-\dv/v_e}\bigr)$.
+\end{itemize}
+
+\begin{modello}
+\textbf{Semplificazioni.} SLS trattato come razzo a un solo stadio (i due booster laterali sono ignorati) e $I_{sp}$
+nel vuoto per tutta la salita: il modello è ottimistico. Il valore $\dv = \SI{9500}{m/s}$ supera la velocità orbitale
+(circa \SI{7.8}{km/s}) perché include le perdite per gravità e per resistenza dell'aria. Il core stage reale contiene
+circa \SI{987}{t} di propellente: stesso ordine di grandezza del risultato.
+\end{modello}
+
+% ===========================================================================
+\fasenuova
+\section{Iniezione trans-lunare (TLI)}
+
+\textbf{Obiettivo.} Calcolare il $\dv$ che trasforma l'orbita circolare di parcheggio in un'ellisse con apogeo alla
+distanza della Luna.\\
+\textbf{Concetti.} Equazione vis-viva, velocità circolare, orbita di trasferimento.
+
+\subsection{Dati}
+\begin{dati}
+  Quota dell'orbita circolare di partenza & $h$ & \SI{192}{km}\\
+  Distanza Terra--Luna (apogeo richiesto) & $r_a$ & \SI{384400}{km}\\
+  Raggio terrestre, $GM$ della Terra & $R_T$, $GM_T$ & vedi costanti\\
+\end{dati}
+
+\begin{formule}
+\[
+  v = \sqrt{GM\left(\frac{2}{r} - \frac{1}{a}\right)} \quad\text{(vis-viva)}
+  \qquad\quad
+  v_{circ} = \sqrt{\frac{GM}{r}} \quad (a = r)
+\]
+\[
+  r_p = R_T + h \qquad a = \frac{r_p + r_a}{2} \qquad
+  \dv = v_p - v_{circ}
+\]
+\end{formule}
+
+\subsection{Procedimento}
+\begin{enumerate}
+  \item Perigeo dell'ellisse di trasferimento = posizione attuale: $r_p = \SI{6563000}{m}$.
+        Apogeo = distanza della Luna: $r_a = \SI{384400000}{m}$.
+  \item Semiasse: $a = \SI{195481500}{m}$.
+  \item Velocità attuale (circolare) in $r_p$: $v_{circ} \approx \SI{7793}{m/s}$.
+  \item Velocità richiesta al perigeo dell'ellisse (vis-viva con $r = r_p$): $v_p \approx \SI{10928}{m/s}$.
+  \item $\dv$ = differenza; l'accensione è nella direzione del moto, quindi $v_p > v_{circ}$.
+\end{enumerate}
+
+\begin{risultato}
+$\dv \approx \SI{3135}{m/s}$\\[0.2em]
+{\small L'app accetta qualsiasi valore positivo: è la simulazione a mostrare l'esito. Orion raggiunge la Luna per
+$\dv$ compreso tra circa \SI{3117}{m/s} e \SI{3175}{m/s}.}
+\end{risultato}
+
+\subsection{Cosa mostra la simulazione}
+\begin{itemize}
+  \item $\dv$ troppo piccolo: l'apogeo non arriva alla Luna e Orion ricade verso la Terra.
+  \item $\dv$ troppo grande: Orion attraversa l'orbita lunare prima dell'incontro e manca la Luna; con valori
+        molto grandi supera la velocità di fuga dalla Terra.
+  \item Il bersaglio è la \emph{sfera d'influenza} lunare, di raggio
+        $r_{SOI} = D\,(M_L/M_T)^{2/5} \approx \SI{66200}{km}$.
+  \item \textbf{Sensibilità}: ogni \si{m/s} di errore sposta l'apogeo di circa \SI{4000}{km}. È lo spunto per
+        spiegare le correzioni di rotta delle missioni reali.
+\end{itemize}
+
+\begin{modello}
+\textbf{Semplificazioni.} Solo la gravità terrestre, accensione istantanea, Luna ferma nel punto d'arrivo dell'apogeo.
+Si parte da un'orbita circolare bassa, come nelle missioni Apollo. Artemis II è invece partita dall'orbita alta della
+fase~1: lì bastava un $\dv$ di qualche centinaio di \si{m/s}, eseguito dal motore del modulo di servizio europeo.
+\end{modello}
+
+% ===========================================================================
+\fasenuova
+\section{Inserimento in orbita lunare (LOI)}
+
+\textbf{Obiettivo.} Calcolare la frenata che porta Orion su un'orbita circolare a \SI{100}{km} dalla superficie lunare.\\
+\textbf{Concetti.} Velocità circolare (gravità = forza centripeta), velocità di fuga, energia orbitale.
+
+\subsection{Dati}
+\begin{dati}
+  Raggio della Luna & $R_L$ & \SI{1737}{km}\\
+  Quota dell'orbita obiettivo & $h$ & \SI{100}{km}\\
+  Parametro gravitazionale della Luna & $GM_L$ & \SI{4.9048e12}{m^3/s^2}\\
+  Velocità di arrivo al perilunio & $v_{arr}$ & \SI{2515}{m/s}\\
+\end{dati}
+
+\begin{formule}
+\[
+  \frac{GM_L\,m}{r^2} = \frac{m\,v^2}{r}
+  \quad\Longrightarrow\quad
+  v_{circ} = \sqrt{\frac{GM_L}{r}}
+  \qquad r = R_L + h
+\]
+\[
+  \dv = v_{arr} - v_{circ} \quad\text{(frenata: il motore spinge contro il moto)}
+\]
+\end{formule}
+
+\subsection{Procedimento}
+\begin{enumerate}
+  \item Raggio dell'orbita dal centro della Luna: $r = \SI{1837000}{m}$.
+  \item Velocità circolare: $v_{circ} \approx \SI{1634}{m/s}$.
+  \item Frenata: differenza tra velocità di arrivo e velocità circolare. Si inserisce il valore positivo.
+  \item Spunto di discussione: $v_{fuga} = \sqrt{2GM_L/r} \approx \SI{2311}{m/s} < v_{arr}$, quindi senza frenata
+        Orion non verrebbe catturata.
+\end{enumerate}
+
+\begin{risultato}
+$\dv \approx \SI{881}{m/s}$\\[0.2em]
+{\small L'app accetta qualsiasi valore positivo e mostra l'orbita ottenuta.}
+\end{risultato}
+
+\subsection{\texorpdfstring{Esiti della simulazione in funzione del $\dv$}{Esiti della simulazione in funzione del Δv}}
+{\small
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+$\dv$ (\si{m/s}) & Esito\\\midrule
+$\le 204$ & Fuga: Orion non viene catturata\\
+205 -- 366 & Orbita troppo allungata (apolunio oltre \SI{10000}{km})\\
+367 -- 839 & Orbita ellittica\\
+\textbf{840 -- 896} & \textbf{Successo}: orbita tra 30 e \SI{300}{km} di quota\\
+897 -- 904 & Perilunio troppo basso\\
+$\ge 905$ & Impatto con la superficie\\
+\bottomrule
+\end{tabularx}}
+
+\begin{modello}
+Artemis II reale \textbf{non entra in orbita lunare}: compie un sorvolo su una traiettoria di \emph{libero ritorno}
+(free-return). Le fasi 4 e 5 sono un esercizio, come nelle missioni Apollo e nelle future Artemis III e successive.
+L'app lo segnala agli studenti.
+\end{modello}
+
+% ===========================================================================
+\fasenuova
+\section{Ritorno verso la Terra (TEI)}
+
+\textbf{Obiettivo.} Calcolare il $\dv$ minimo per sfuggire alla gravità della Luna partendo dall'orbita circolare
+a \SI{100}{km}.\\
+\textbf{Concetti.} Energia meccanica, velocità di fuga.
+
+\subsection{Dati}
+Gli stessi della fase 4: $R_L$, $h = \SI{100}{km}$, $GM_L$; la velocità attuale è $v_{circ}$ della fase 4.
+
+\begin{formule}
+\[
+  E = \frac12 m v^2 - \frac{GM_L\,m}{r} \ge 0
+  \quad\Longrightarrow\quad
+  v_{fuga} = \sqrt{\frac{2GM_L}{r}}
+\]
+\[
+  \dv_{min} = v_{fuga} - v_{circ} = \bigl(\sqrt2 - 1\bigr)\,v_{circ}
+\]
+\end{formule}
+
+\subsection{Procedimento}
+\begin{enumerate}
+  \item Distanza dal centro della Luna: $r = \SI{1837000}{m}$ (come nella fase 4).
+  \item Velocità circolare attuale: $v_{circ} \approx \SI{1634}{m/s}$.
+  \item Velocità di fuga alla stessa distanza: $v_{fuga} \approx \SI{2311}{m/s}$.
+  \item Differenza: accensione \emph{prograda} (nel verso del moto).
+  \item Osservazione utile: $v_{fuga} = \sqrt2\,v_{circ}$, quindi serve un aumento di circa il 41\%.
+\end{enumerate}
+
+\begin{risultato}
+$\dv_{min} \approx \SI{677}{m/s}$\\[0.2em]
+{\small Intervallo considerato corretto: da \SI{670}{m/s} a \SI{1083}{m/s} ($-1\%$ / $+60\%$).
+Sotto: Orion resta legata alla Luna su un'ellisse più allungata. Sopra: spreco di propellente.}
+\end{risultato}
+
+\begin{modello}
+Con esattamente $\dv_{min}$ Orion si allontanerebbe rallentando sempre più, senza mai fermarsi: è il limite tra
+restare legati e sfuggire. Per tornare a casa in pochi giorni serve un po' di più (le missioni Apollo usavano circa
+\SI{1}{km/s}).
+\end{modello}
+
+% ===========================================================================
+\fasenuova
+\section{Rientro e ammaraggio}
+
+\textbf{Obiettivo.} Scegliere l'angolo di rientro, calcolare la quota di apertura dei paracadute freno e l'area
+dei paracadute principali.\\
+\textbf{Concetti.} Media aritmetica, moto rettilineo uniforme, equilibrio delle forze e velocità limite.
+
+\subsection{Dati}
+\begin{dati}
+  Velocità all'ingresso in atmosfera & $v_0$ & \SI{11000}{m/s}\\
+  Velocità costante sotto i \SI{10000}{m} & $v$ & \SI{150}{m/s}\\
+  Ritardo di apertura dei paracadute freno (drogue) & $t$ & \SI{20}{s}\\
+  Massa di Orion al rientro & $m$ & \SI{10400}{kg}\\
+  Accelerazione di gravità & $g$ & \SI{9.81}{m/s^2}\\
+  Densità dell'aria & $\rho$ & \SI{1.225}{kg/m^3}\\
+  Coefficiente di resistenza & $C_d$ & \num{2.0}\\
+  Velocità finale di ammaraggio & $v_f$ & \SI{10}{m/s}\\
+\end{dati}
+
+\begin{formule}
+\[
+  \bar\gamma = \frac{\gamma_1 + \gamma_2 + \dots + \gamma_n}{n}
+  \qquad\qquad
+  s = v\,t \qquad h_{drogue} = h_0 - v\,t
+\]
+\[
+  m g = \frac12\,\rho\, v_f^2\, C_d\, A
+  \quad\Longrightarrow\quad
+  A = \frac{2\,m g}{\rho\, v_f^2\, C_d}
+\]
+\end{formule}
+
+\subsection{Procedimento}
+\begin{enumerate}
+  \item \textbf{Angolo di rientro.} Nella tabella dei test del briefing selezionare solo quelli con esito
+        \emph{Successo} ($-6{,}0^\circ$, $-6{,}5^\circ$, $-7{,}0^\circ$) e farne la media. Gli angoli sono negativi
+        perché la traiettoria scende sotto l'orizzonte.
+  \item \textbf{Quota dei drogue.} Sotto i \SI{10000}{m} la discesa è a velocità costante (moto rettilineo uniforme):
+        in \SI{20}{s} la capsula percorre $s = \SI{150}{m/s}\cdot\SI{20}{s} = \SI{3000}{m}$. Sottrarre dalla quota iniziale.
+  \item \textbf{Area dei paracadute principali.} Alla velocità limite peso e resistenza si equilibrano.
+        Isolare $A$: moltiplicare per 2 e dividere per $\rho\,v_f^2\,C_d$. Attenzione al quadrato della velocità.
+\end{enumerate}
+
+\begin{risultato}
+Angolo $\bar\gamma = -6{,}5^\circ$ \qquad $h_{drogue} = \SI{7000}{m}$ \qquad $A \approx \SI{832.8}{m^2}$\\[0.2em]
+{\small Angolo: il rientro riesce da $-5{,}9^\circ$ a $-7{,}0^\circ$. Quota e area: tolleranza $\pm 10\%$
+(\SIrange{6300}{7700}{m}; \SIrange{750}{916}{m^2}).}
+\end{risultato}
+
+\subsection{Spunti per la spiegazione}
+\begin{itemize}
+  \item Energia cinetica all'ingresso: $E_k = \frac12 m v_0^2 \approx \SI{6.3e11}{J}$, da dissipare in calore
+        (lo scudo termico arriva a circa \SI{2500}{\degreeCelsius}).
+  \item Angolo troppo radente: la capsula rimbalza fuori dall'atmosfera (\emph{skip-off}). Troppo ripido:
+        la decelerazione supera il limite di 8\,$g$ per l'equipaggio.
+  \item Nella tabella dei test, decelerazione e temperatura crescono con la ripidità dell'angolo: si può chiedere
+        di individuare la tendenza prima del calcolo.
+\end{itemize}
+
+% ===========================================================================
+\fasenuova
+\sezionelibera{Flight Plan: consumo di propellente e durata delle accensioni}
+
+Al termine il software genera il \emph{Flight Plan} con i $\dv$ inseriti dagli studenti nelle fasi 3, 4 e 5. Per ogni
+accensione calcola la massa di propellente consumata (Tsiolkovsky, questa volta partendo dalla massa \emph{iniziale})
+e la durata a spinta costante.
+
+\begin{formule}
+\[
+  m_p = m_0\left(1 - e^{-\dv/v_e}\right) \qquad v_e = I_{sp}\,g_0
+  \qquad\qquad
+  t \approx \frac{m_p\, v_e}{F}
+\]
+\end{formule}
+
+La formula della durata viene dalla portata in massa costante: la spinta è $F = \dot m\, v_e$, quindi
+$t = m_p/\dot m = m_p v_e / F$. Le accensioni LOI e TEI sono in sequenza: la massa iniziale della TEI è quella rimasta
+dopo la LOI.
+
+{\small
+\begin{tabularx}{\linewidth}{@{}l X r r r r r@{}}
+\toprule
+Manovra & Motore & $m_0$ (kg) & $I_{sp}$ (s) & $F$ (kN) & $m_p$ (kg)$^*$ & $t$ (s)$^*$\\\midrule
+TLI & ICPS (RL10B-2), Orion + ICPS & \num{58500} & \num{465.5} & \num{110} & \num{29060} & \num{1206}\\
+LOI & Orion, modulo di servizio (ESM) & \num{26500} & \num{316} & \num{26.7} & \num{6557} & \num{761}\\
+TEI & Orion, modulo di servizio (ESM) & \num{19943} & \num{316} & \num{26.7} & \num{3913} & \num{454}\\
+\bottomrule
+\end{tabularx}\\[0.3em]
+$^*$ Valori ottenuti con i $\dv$ attesi delle fasi 3--5 (\SI{3135}{}, \SI{881}{} e \SI{677}{m/s}).}
+
+\begin{modello}
+\textbf{Spunto di discussione.} Con i $\dv$ ideali LOI e TEI richiedono circa \SI{10470}{kg} di propellente, più degli
+\SI{8600}{kg} disponibili nel modulo di servizio (il report lo segnala). È un buon aggancio per spiegare perché Artemis II
+non entra in orbita lunare ma sfrutta una traiettoria di libero ritorno.
+\end{modello}
+
+% ===========================================================================
+\fasenuova
+\sezionelibera{Riepilogo dei risultati attesi}
+
+{\small\renewcommand{\arraystretch}{1.9}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright}p{1.7cm} >{\raggedright\arraybackslash}X >{\raggedright}p{3.4cm} >{\raggedright\arraybackslash}p{2.7cm}@{}}
+\toprule
+\textbf{Fase} & \textbf{Formula chiave} & \textbf{Risultato} & \textbf{Verifica nell'app}\\\midrule
+1 · HEO & $a = \dfrac{r_p + r_a}{2}$ \qquad $T = 2\pi\sqrt{\dfrac{a^3}{GM_T}}$ & $a = \SI{41554000}{m}$\newline $T \approx \SI{84300}{s}$ ($\approx\SI{23.4}{h}$) & $\pm 2\%$\\
+2 · Lancio & $m_{fuel} = m_{dry}\left(e^{\dv/(I_{sp}\,g_0)} - 1\right)$ & $m_{fuel} \approx \SI{1129000}{kg}$ & $\pm 2\%$\\
+3 · TLI & $\dv = \sqrt{GM_T\left(\dfrac{2}{r_p} - \dfrac1a\right)} - \sqrt{\dfrac{GM_T}{r_p}}$ & $\dv \approx \SI{3135}{m/s}$ & simulazione:\newline \SIrange{3117}{3175}{m/s}\\
+4 · LOI & $\dv = v_{arr} - \sqrt{\dfrac{GM_L}{r}}$ & $\dv \approx \SI{881}{m/s}$ & simulazione:\newline \SIrange{840}{896}{m/s}\\
+5 · TEI & $\dv = \sqrt{\dfrac{2GM_L}{r}} - \sqrt{\dfrac{GM_L}{r}}$ & $\dv \approx \SI{677}{m/s}$ & \SIrange{670}{1083}{m/s}\\
+6 · Rientro & $\bar\gamma$ = media dei test riusciti\newline $h_{drogue} = h_0 - v\,t$ \qquad $A = \dfrac{2mg}{\rho\, v_f^2\, C_d}$ & $\bar\gamma = -6{,}5^\circ$\newline $h_{drogue} = \SI{7000}{m}$\newline $A \approx \SI{832.8}{m^2}$ & angolo: da $-5{,}9^\circ$ a $-7{,}0^\circ$\newline quota e area: $\pm 10\%$\\
+\bottomrule
+\end{tabularx}}
+
+\end{document}
