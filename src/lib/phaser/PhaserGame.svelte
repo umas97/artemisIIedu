@@ -7,6 +7,12 @@
   import { LOIScene } from './scenes/LOIScene.js';
   import { TEIScene } from './scenes/TEIScene.js';
   import { ReentryScene } from './scenes/ReentryScene.js';
+  import { get } from 'svelte/store';
+  import { missionState } from '../stores/missionStore.js';
+
+  // Una scena per fase, nello stesso ordine di currentPhase (1…6)
+  const SCENES = [EarthOrbitScene, LaunchScene, TLIScene, LOIScene, TEIScene, ReentryScene];
+  const SCENE_KEYS = ['EarthOrbitScene', 'LaunchScene', 'TLIScene', 'LOIScene', 'TEIScene', 'ReentryScene'];
 
   let gameContainer;
   let game;
@@ -28,7 +34,7 @@
           debug: false
         }
       },
-      scene: [EarthOrbitScene, LaunchScene, TLIScene, LOIScene, TEIScene, ReentryScene],
+      scene: [],
       backgroundColor: '#04060b',
       fps: {
         target: 60,
@@ -38,6 +44,11 @@
         postBoot: (gameInstance) => {
           gameInstance.events.off('blur');
           window.game = gameInstance;
+          // Si avvia solo la scena della fase corrente: se il gioco viene ricreato a
+          // fase già avanzata (ricaricamento a caldo in sviluppo) non deve ripartire
+          // l'orbita della fase 1 sotto le altre scene.
+          const current = SCENE_KEYS[get(missionState).currentPhase - 1] ?? SCENE_KEYS[0];
+          SCENES.forEach((cls, i) => gameInstance.scene.add(SCENE_KEYS[i], cls, SCENE_KEYS[i] === current));
         }
       }
     };

@@ -35,8 +35,14 @@ function strokeDashedEllipse(g, cx, cy, a, b, { color = PALETTE.orbit, alpha = 0
   }
 }
 
-/** Equazione di Keplero M = E − e·sinE, risolta con Newton. */
+/**
+ * Equazione di Keplero M = E − e·sinE, risolta con Newton.
+ * M va normalizzata in [0, 2π): con e alto (≈0,84 qui) e M vicina a −π,
+ * partire da E = π fa divergere Newton e Orion salta in punti a caso.
+ */
 function solveKepler(M, e) {
+  const TWO_PI = 2 * Math.PI;
+  M = ((M % TWO_PI) + TWO_PI) % TWO_PI;
   let E = e < 0.8 ? M : Math.PI;
   for (let i = 0; i < 30; i++) {
     const d = (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
@@ -113,7 +119,7 @@ export class EarthOrbitScene extends Phaser.Scene {
 
   /** Posizione sullo schermo per una data anomalia media (Terra nel fuoco). */
   positionAt(M) {
-    const E = solveKepler(Phaser.Math.Angle.Wrap(M), this.e);
+    const E = solveKepler(M, this.e);
     const xm = this.a * (Math.cos(E) - this.e); // dal fuoco, verso il perigeo
     const ym = this.b * Math.sin(E);
     const r = this.a * (1 - this.e * Math.cos(E));
